@@ -8,21 +8,19 @@
 
 
 ;creación de un código que pueda hacer que un led parpadee según ciertos intervalos.
-;En este caso se intetará hacer que vaya decrementando hace ser cero. Por ello, cuando termine de quitar en cada ciclo hasta que llegue a cero.
-;Cuando llegué a cero, entonces se activa la bandera del bit 1 de register. 
+;En este caso se intetará hacer que vaya decrementando hasta cero.
+;Cuando llegué a cero,  se activa la bandera del bit 1 de register, la bandera cero y se usa BRNE para ejecutar acciones.
 
 .include "M328PDEF.inc"
 .org 0x00
 
 ;CLC ; Para esta parte es bueno desconectar las interrupciones, de esta manera va un poco más rápido par cargar esta información.
-; Una vez cargado, entonces, ya puede empezar a habilitarse las interrupciones. 
+; Una vez cargado, entonces, ya puede empezar a habilitarse las interrupciones. (C cancela este plan debido a que no es es con Timesk0)
 
 
 
 ;---------------------------------------------
-;.def Perder_Tiempo = R16 //se definio la función donde estará el contador, esta es una forma sana para el nano para que pueda seguir trabajando y pasar el tiempo. 
-:.def Contador = R17 //En este caso, lo que se busca es ya sea incrmentar a overflow o decrementar a cero. 
-; r18 será mi led (Aclaración)
+;Se utilizar R16 para el pointer
 ;---------------------------------------------
  
 
@@ -32,10 +30,10 @@ rjmp Start//Este lo podría borrar, pues va consecutivo
 
 Start:
 
-    LDI R18, Low (RAMEND)
-	OUT SPL, R18
-	LDI R18, HIGH (RAMEND)
-	OUT SPL, R18
+    LDI R16, Low (RAMEND)
+	OUT SPL, R16
+	LDI R16, HIGH (RAMEND)
+	OUT SPH, R16
 	
 	
 	 
@@ -43,37 +41,44 @@ Start:
     cbi PORTB, PB0; LED apagado Al inico del código
 
     ; Inicializar contador
-    clr R17; limpio el contador actualmente antes de iniciar, por si las moscas
-	LDI R17, 0X10 ;Setear a 16 en hexa en este caso, es el bit 5 sino mal recuerdo.// pereguntar
+    ;clr R17; limpio el contador actualmente antes de iniciar, por si las moscas
+	;LDI R17, 0X10 ;Setear a 16 en hexa en este caso, es el bit 5 sino mal recuerdo.// pereguntar
 
 
 
 	LOOP: ;el loop para encender y apagar. --------------------------------------------
 
 	;Encender el led
-	 ldi R18, (1<<PB0)
-	 Out DDRB, R18
+	 SBI PORTB, PB0 ; LED LUZ para mi puerto b, específicamente pb0
+	 RCALL PerderTiempo ; salto, y regresa a esta linea
 
-	 ldi R18, (1<<PB0)
-	 OUT PORTB, R18
-
-	rcall Perder_Tiempo ; salto, y regresa a esta linea
 	; Apagar el led
-	ldi R18, (1<<PB0)
-	Out DDRB, R18
+	CBI PORTB, PB0
 
-	ldi R18, 0x00
-	OUT PORTB, R18
-
-
-	rcall Perder_Tiempo
+	RCALL PerderTiempo
 	RJMP LOOP ;preguntar si es rjmp o solo jump.-----------------------------------------
 
 
 
 	; Sub rutinas------------------
 	
-	 Perder_Tiempo: 
-	dec R17;  En este caso hacemos el decremento
-	brne Perder_Tiempo
-	ret
+	;-----------------------------
+	;  Prueba con ciclos anidados
+	;-----------------------------
+	PerderTiempo:
+		LDI R17, 0xFF	; Primero se le carga b'1111111 al registro R17
+
+	Delay_ext:
+		LDI R18, 0xFF	; EL Delay que engloba al interior, empieza por encender todos los bits a R18 too
+
+	Delay_int:
+		DEC R18		; Se decrementa el registro R18
+
+	; Cuando R18 llega a cero, entonces salta nuevamene al ciclo interno Y decrecementa R17. 
+
+		BRNE Delay_int
+		DEC R17
+		BRNE Delay_ext
+		; Cuando el registro R17llega a cero, salta al externo.
+		
+		RET; REGRESA de la subrutina
