@@ -14,19 +14,19 @@
 .include "M328PDEF.inc"
 .org 0x00
 
-;CLC // Para esta parte es bueno desconectar las interrupciones, de esta manera va un poco más rápido par cargar esta información.
+;CLC ; Para esta parte es bueno desconectar las interrupciones, de esta manera va un poco más rápido par cargar esta información.
 ; Una vez cargado, entonces, ya puede empezar a habilitarse las interrupciones. 
 
 
 
 ;---------------------------------------------
-//.def Perder_Tiempo = R16 //se definio la función donde estará el contador, esta es una forma sana para el nano para que pueda seguir trabajando y pasar el tiempo. 
-//.def Contador = R17 //En este caso, lo que se busca es ya sea incrmentar a overflow o decrementar a cero. 
+;.def Perder_Tiempo = R16 //se definio la función donde estará el contador, esta es una forma sana para el nano para que pueda seguir trabajando y pasar el tiempo. 
+:.def Contador = R17 //En este caso, lo que se busca es ya sea incrmentar a overflow o decrementar a cero. 
 ; r18 será mi led (Aclaración)
 ;---------------------------------------------
  
 
-//CLC desactivar interrupciones
+;CLC desactivar interrupciones
 rjmp Start//Este lo podría borrar, pues va consecutivo
 
 
@@ -44,21 +44,21 @@ Start:
 
     ; Inicializar contador
     clr R17; limpio el contador actualmente antes de iniciar, por si las moscas
-	LDI R17, 0X10 //Setear a 16 en hexa en este caso, es el bit 5 sino mal recuerdo.// pereguntar
+	LDI R17, 0X10 ;Setear a 16 en hexa en este caso, es el bit 5 sino mal recuerdo.// pereguntar
 
 
 
-	LOOP: //el loop para encender y apagar. --------------------------------------------
+	LOOP: ;el loop para encender y apagar. --------------------------------------------
 
-	//Encender el led
+	;Encender el led
 	 ldi R18, (1<<PB0)
 	 Out DDRB, R18
 
 	 ldi R18, (1<<PB0)
 	 OUT PORTB, R18
 
-	rcall Perder_Tiempo // salto, y regresa a esta linea
-	// Apagar el led
+	rcall Perder_Tiempo ; salto, y regresa a esta linea
+	; Apagar el led
 	ldi R18, (1<<PB0)
 	Out DDRB, R18
 
@@ -67,7 +67,7 @@ Start:
 
 
 	rcall Perder_Tiempo
-	RJMP LOOP //preguntar si es rjmp o solo jump.-----------------------------------------
+	RJMP LOOP ;preguntar si es rjmp o solo jump.-----------------------------------------
 
 
 
