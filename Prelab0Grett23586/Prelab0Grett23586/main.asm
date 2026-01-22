@@ -41,8 +41,9 @@ Start:
     cbi PORTB, PB0; LED apagado Al inico del código
 
     ; Inicializar contador
-    ;clr R17; limpio el contador actualmente antes de iniciar, por si las moscas
-	;LDI R17, 0X10 ;Setear a 16 en hexa en este caso, es el bit 5 sino mal recuerdo.// pereguntar
+    ;clr R17; limpio el contador actualmente antes de iniciar, por si las moscas, esto esta bien
+	;LDI R17, 0X10 ;Setear a 16 en hexa en este caso, es el bit 5 sino mal recuerdo
+	; El ldi, also está bien pero se cambió para que fuera visible por el ojo humano
 
 
 
