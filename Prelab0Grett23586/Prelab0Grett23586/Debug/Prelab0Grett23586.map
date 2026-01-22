@@ -1,5 +1,5 @@
 
-AVRASM ver. 2.2.8  C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\Prelab0Grett23586\Prelab0Grett23586\main.asm Tue Jan 20 16:18:40 2026
+AVRASM ver. 2.2.8  C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\Prelab0Grett23586\Prelab0Grett23586\main.asm Thu Jan 22 05:36:22 2026
 
 
 EQU  SIGNATURE_000 0000001e
@@ -696,5 +696,7 @@ EQU  TWIaddr      00000030
 EQU  SPMRaddr     00000032
 EQU  INT_VECTORS_SIZE 00000034
 CSEG Start        00000001
-CSEG LOOP         00000009
-CSEG Perder_Tiempo 00000014
+CSEG LOOP         00000007
+CSEG PerderTiempo 0000000c
+CSEG Delay_ext    0000000d
+CSEG Delay_int    0000000e

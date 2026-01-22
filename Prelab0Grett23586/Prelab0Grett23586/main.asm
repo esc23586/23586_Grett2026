@@ -25,20 +25,20 @@
  
 
 ;CLC desactivar interrupciones
-rjmp Start//Este lo podría borrar, pues va consecutivo
+rjmp Start;Este lo podría borrar, pues va consecutivo
 
 
 Start:
 
-    LDI R16, Low (RAMEND)
+    LDI R16, LOW(RAMEND)
 	OUT SPL, R16
-	LDI R16, HIGH (RAMEND)
+	LDI R16, HIGH(RAMEND)
 	OUT SPH, R16
 	
 	
 	 
     sbi DDRB, PB0 ; PB0 como salida (D8 según la guia de mi arduino chafa :3 )
-    cbi PORTB, PB0; LED apagado Al inico del código
+    cbi PORTB, PB0; LED apagado Al inico del código.Clear Bit in I/O Register
 
     ; Inicializar contador
     ;clr R17; limpio el contador actualmente antes de iniciar, por si las moscas, esto esta bien
@@ -50,14 +50,14 @@ Start:
 	LOOP: ;el loop para encender y apagar. --------------------------------------------
 
 	;Encender el led
-	 SBI PORTB, PB0 ; LED LUZ para mi puerto b, específicamente pb0
+	 SBI PORTB, PB0 ; LED LUZ para mi puerto b, específicamente pb0, Set Bit in I/O Register
 	 RCALL PerderTiempo ; salto, y regresa a esta linea
 
 	; Apagar el led
-	CBI PORTB, PB0
+	CBI PORTB, PB0  ;clear Bit in I/O Register
 
 	RCALL PerderTiempo
-	RJMP LOOP ;preguntar si es rjmp o solo jump.-----------------------------------------
+	RJMP LOOP ;Regresa al loop eternamente 
 
 
 
@@ -75,11 +75,10 @@ Start:
 	Delay_int:
 		DEC R18		; Se decrementa el registro R18
 
-	; Cuando R18 llega a cero, entonces salta nuevamene al ciclo interno Y decrecementa R17. 
+	
 
-		BRNE Delay_int
+		BRNE Delay_int; Cuando R18 llega a cero, entonces salta nuevamene al ciclo interno Y decrecementa R17. 
 		DEC R17
-		BRNE Delay_ext
-		; Cuando el registro R17llega a cero, salta al externo.
+		BRNE Delay_ext; Cuando el registro R17 llega a cero, salta al externo.
 		
 		RET; REGRESA de la subrutina

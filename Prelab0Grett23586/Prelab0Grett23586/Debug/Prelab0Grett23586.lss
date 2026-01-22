@@ -1,10 +1,10 @@
 
-AVRASM ver. 2.2.8  C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\Prelab0Grett23586\Prelab0Grett23586\main.asm Tue Jan 20 16:18:40 2026
+AVRASM ver. 2.2.8  C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\Prelab0Grett23586\Prelab0Grett23586\main.asm Thu Jan 22 05:36:22 2026
 
 [builtin](2): Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\avrasm\inc\m328Pdef.inc'
-C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\Prelab0Grett23586\Prelab0Grett23586\main.asm(14): Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\avrasm\inc\M328PDEF.inc'
+C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\Prelab0Grett23586\Prelab0Grett23586\main.asm(14): Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\avrasm\inc\M328PDEF.inc'
 [builtin](2): Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\avrasm\inc\m328Pdef.inc'
-C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\Prelab0Grett23586\Prelab0Grett23586\main.asm(14): Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\avrasm\inc\M328PDEF.inc'
+C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\Prelab0Grett23586\Prelab0Grett23586\main.asm(14): Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\avrasm\inc\M328PDEF.inc'
                                  
                                  ;
                                  
@@ -996,8 +996,8 @@ C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\Prelab0Grett23586\Pr
                                  
                                  
                                  ;creación de un código que pueda hacer que un led parpadee según ciertos intervalos.
-                                 ;En este caso se intetará hacer que vaya decrementando hace ser cero. Por ello, cuando termine de quitar en cada ciclo hasta que llegue a cero.
-                                 ;Cuando llegué a cero, entonces se activa la bandera del bit 1 de register. 
+                                 ;En este caso se intetará hacer que vaya decrementando hasta cero.
+                                 ;Cuando llegué a cero,  se activa la bandera del bit 1 de register, la bandera cero y se usa BRNE para ejecutar acciones.
                                  
                                  .include "M328PDEF.inc"
                                  
@@ -1045,28 +1045,26 @@ C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\Prelab0Grett23586\Pr
                                  ; ***** END OF FILE ******************************************************
                                  .org 0x00
                                  
-                                 ;CLC // Para esta parte es bueno desconectar las interrupciones, de esta manera va un poco más rápido par cargar esta información.
-                                 ; Una vez cargado, entonces, ya puede empezar a habilitarse las interrupciones. 
+                                 ;CLC ; Para esta parte es bueno desconectar las interrupciones, de esta manera va un poco más rápido par cargar esta información.
+                                 ; Una vez cargado, entonces, ya puede empezar a habilitarse las interrupciones. (C cancela este plan debido a que no es es con Timesk0)
                                  
                                  
                                  
                                  ;---------------------------------------------
-                                 //.def Perder_Tiempo = R16 //se definio la función donde estará el contador, esta es una forma sana para el nano para que pueda seguir trabajando y pasar el tiempo. 
-                                 //.def Contador = R17 //En este caso, lo que se busca es ya sea incrmentar a overflow o decrementar a cero. 
-                                 ; r18 será mi led (Aclaración)
+                                 ;Se utilizar R16 para el pointer
                                  ;---------------------------------------------
                                   
                                  
-                                 //CLC desactivar interrupciones
-000000 c000                      rjmp Start//Este lo podría borrar, pues va consecutivo
+                                 ;CLC desactivar interrupciones
+000000 c000                      rjmp Start;Este lo podría borrar, pues va consecutivo
                                  
                                  
                                  Start:
                                  
-000001 ef2f                          LDI R18, Low (RAMEND)
-000002 bf2d                      	OUT SPL, R18
-000003 e028                      	LDI R18, HIGH (RAMEND)
-000004 bf2d                      	OUT SPL, R18
+000001 ef0f                          LDI R16, Low (RAMEND)
+000002 bf0d                      	OUT SPL, R16
+000003 e008                      	LDI R16, HIGH (RAMEND)
+000004 bf0e                      	OUT SPH, R16
                                  	
                                  	
                                  	 
@@ -1074,40 +1072,47 @@ C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\Prelab0Grett23586\Pr
 000006 9828                          cbi PORTB, PB0; LED apagado Al inico del código
                                  
                                      ; Inicializar contador
-000007 2711                          clr R17; limpio el contador actualmente antes de iniciar, por si las moscas
-000008 e110                      	LDI R17, 0X10 //Setear a 16 en hexa en este caso, es el bit 5 sino mal recuerdo.// pereguntar
+                                     ;clr R17; limpio el contador actualmente antes de iniciar, por si las moscas, esto esta bien
+                                 	;LDI R17, 0X10 ;Setear a 16 en hexa en este caso, es el bit 5 sino mal recuerdo
+                                 	; El ldi, also está bien pero se cambió para que fuera visible por el ojo humano
                                  
                                  
                                  
-                                 	LOOP: //el loop para encender y apagar. --------------------------------------------
+                                 	LOOP: ;el loop para encender y apagar. --------------------------------------------
                                  
-                                 	//Encender el led
-000009 e021                      	 ldi R18, (1<<PB0)
-00000a b924                      	 Out DDRB, R18
+                                 	;Encender el led
+000007 9a28                      	 SBI PORTB, PB0 ; LED LUZ para mi puerto b, específicamente pb0
+000008 d003                      	 RCALL PerderTiempo ; salto, y regresa a esta linea
                                  
-00000b e021                      	 ldi R18, (1<<PB0)
-00000c b925                      	 OUT PORTB, R18
+                                 	; Apagar el led
+000009 9828                      	CBI PORTB, PB0
                                  
-00000d d006                      	rcall Perder_Tiempo // salto, y regresa a esta linea
-                                 	// Apagar el led
-00000e e021                      	ldi R18, (1<<PB0)
-00000f b924                      	Out DDRB, R18
-                                 
-000010 e020                      	ldi R18, 0x00
-000011 b925                      	OUT PORTB, R18
-                                 
-                                 
-000012 d001                      	rcall Perder_Tiempo
-000013 cff5                      	RJMP LOOP //preguntar si es rjmp o solo jump.-----------------------------------------
+00000a d001                      	RCALL PerderTiempo
+00000b cffb                      	RJMP LOOP ;preguntar si es rjmp o solo jump.-----------------------------------------
                                  
                                  
                                  
                                  	; Sub rutinas------------------
                                  	
-                                 	 Perder_Tiempo: 
-000014 951a                      	dec R17;  En este caso hacemos el decremento
-000015 f7f1                      	brne Perder_Tiempo
-000016 9508                      	ret
+                                 	;-----------------------------
+                                 	;  Prueba con ciclos anidados
+                                 	;-----------------------------
+                                 	PerderTiempo:
+00000c ef1f                      		LDI R17, 0xFF	; Primero se le carga b'1111111 al registro R17
+                                 
+                                 	Delay_ext:
+00000d ef2f                      		LDI R18, 0xFF	; EL Delay que engloba al interior, empieza por encender todos los bits a R18 too
+                                 
+                                 	Delay_int:
+00000e 952a                      		DEC R18		; Se decrementa el registro R18
+                                 
+                                 	; Cuando R18 llega a cero, entonces salta nuevamene al ciclo interno Y decrecementa R17. 
+                                 
+00000f f7f1                      		BRNE Delay_int
+000010 951a                      		DEC R17
+000011 f7d9                      		BRNE Delay_ext
+                                 		; Cuando el registro R17llega a cero, salta al externo.
+                                 		
 
 
 RESOURCE USE INFORMATION
@@ -1127,37 +1132,37 @@ counted separately from r26..r31 here.
 "ATmega328P" register use summary:
 x  :   0 y  :   0 z  :   0 r0 :   0 r1 :   0 r2 :   0 r3 :   0 r4 :   0 
 r5 :   0 r6 :   0 r7 :   0 r8 :   0 r9 :   0 r10:   0 r11:   0 r12:   0 
-r13:   0 r14:   0 r15:   0 r16:   0 r17:   3 r18:  12 r19:   0 r20:   0 
+r13:   0 r14:   0 r15:   0 r16:   4 r17:   2 r18:   2 r19:   0 r20:   0 
 r21:   0 r22:   0 r23:   0 r24:   0 r25:   0 r26:   0 r27:   0 r28:   0 
 r29:   0 r30:   0 r31:   0 
-Registers used: 2 out of 35 (5.7%)
+Registers used: 3 out of 35 (8.6%)
 
 "ATmega328P" instruction use summary:
 .lds  :   0 .sts  :   0 adc   :   0 add   :   0 adiw  :   0 and   :   0 
 andi  :   0 asr   :   0 bclr  :   0 bld   :   0 brbc  :   0 brbs  :   0 
 brcc  :   0 brcs  :   0 break :   0 breq  :   0 brge  :   0 brhc  :   0 
 brhs  :   0 brid  :   0 brie  :   0 brlo  :   0 brlt  :   0 brmi  :   0 
-brne  :   1 brpl  :   0 brsh  :   0 brtc  :   0 brts  :   0 brvc  :   0 
-brvs  :   0 bset  :   0 bst   :   0 call  :   0 cbi   :   1 cbr   :   0 
-clc   :   0 clh   :   0 cli   :   0 cln   :   0 clr   :   1 cls   :   0 
+brne  :   2 brpl  :   0 brsh  :   0 brtc  :   0 brts  :   0 brvc  :   0 
+brvs  :   0 bset  :   0 bst   :   0 call  :   0 cbi   :   2 cbr   :   0 
+clc   :   0 clh   :   0 cli   :   0 cln   :   0 clr   :   0 cls   :   0 
 clt   :   0 clv   :   0 clz   :   0 com   :   0 cp    :   0 cpc   :   0 
-cpi   :   0 cpse  :   0 dec   :   1 eor   :   0 fmul  :   0 fmuls :   0 
+cpi   :   0 cpse  :   0 dec   :   2 eor   :   0 fmul  :   0 fmuls :   0 
 fmulsu:   0 icall :   0 ijmp  :   0 in    :   0 inc   :   0 jmp   :   0 
-ld    :   0 ldd   :   0 ldi   :   7 lds   :   0 lpm   :   0 lsl   :   0 
+ld    :   0 ldd   :   0 ldi   :   4 lds   :   0 lpm   :   0 lsl   :   0 
 lsr   :   0 mov   :   0 movw  :   0 mul   :   0 muls  :   0 mulsu :   0 
-neg   :   0 nop   :   0 or    :   0 ori   :   0 out   :   6 pop   :   0 
+neg   :   0 nop   :   0 or    :   0 ori   :   0 out   :   2 pop   :   0 
 push  :   0 rcall :   2 ret   :   1 reti  :   0 rjmp  :   2 rol   :   0 
-ror   :   0 sbc   :   0 sbci  :   0 sbi   :   1 sbic  :   0 sbis  :   0 
+ror   :   0 sbc   :   0 sbci  :   0 sbi   :   2 sbic  :   0 sbis  :   0 
 sbiw  :   0 sbr   :   0 sbrc  :   0 sbrs  :   0 sec   :   0 seh   :   0 
 sei   :   0 sen   :   0 ser   :   0 ses   :   0 set   :   0 sev   :   0 
 sez   :   0 sleep :   0 spm   :   0 st    :   0 std   :   0 sts   :   0 
 sub   :   0 subi  :   0 swap  :   0 tst   :   0 wdr   :   0 
-Instructions used: 10 out of 113 (8.8%)
+Instructions used: 9 out of 113 (8.0%)
 
 "ATmega328P" memory use summary [bytes]:
 Segment   Begin    End      Code   Data   Used    Size   Use%
 ---------------------------------------------------------------
-[.cseg] 0x000000 0x00002e     46      0     46   32768   0.1%
+[.cseg] 0x000000 0x000026     38      0     38   32768   0.1%
 [.dseg] 0x000100 0x000100      0      0      0    2048   0.0%
 [.eseg] 0x000000 0x000000      0      0      0    1024   0.0%
 
