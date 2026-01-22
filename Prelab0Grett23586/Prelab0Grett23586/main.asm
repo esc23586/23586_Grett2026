@@ -37,8 +37,8 @@ Start:
 	
 	
 	 
-    sbi DDRB, PB0 ; PB0 como salida (D8 según la guia de mi arduino chafa :3 )
-    cbi PORTB, PB0; LED apagado Al inico del código.Clear Bit in I/O Register
+    SBI DDRB, PB0 ; PB0 como salida (D8 según la guia de mi arduino chafa :3 )
+    CBI PORTB, PB0; LED apagado Al inico del código.Clear Bit in I/O Register
 
     ; Inicializar contador
     ;clr R17; limpio el contador actualmente antes de iniciar, por si las moscas, esto esta bien
