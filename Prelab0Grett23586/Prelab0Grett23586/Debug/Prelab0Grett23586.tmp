@@ -27,6 +27,7 @@
   <LOOP><FILE>C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\Prelab0Grett23586\Prelab0Grett23586\main.asm</FILE><LINE>50</LINE></LOOP>
   <PerderTiempo><FILE>C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\Prelab0Grett23586\Prelab0Grett23586\main.asm</FILE><LINE>69</LINE></PerderTiempo>
   <Delay_ext><FILE>C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\Prelab0Grett23586\Prelab0Grett23586\main.asm</FILE><LINE>72</LINE></Delay_ext>
-  <Delay_int><FILE>C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\Prelab0Grett23586\Prelab0Grett23586\main.asm</FILE><LINE>75</LINE></Delay_int>
+  <Delay_2><FILE>C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\Prelab0Grett23586\Prelab0Grett23586\main.asm</FILE><LINE>74</LINE></Delay_2>
+  <Delay_int><FILE>C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\Prelab0Grett23586\Prelab0Grett23586\main.asm</FILE><LINE>77</LINE></Delay_int>
  </LABELS>
 </ASSEMBLER_INFO>

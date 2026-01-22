@@ -67,17 +67,21 @@ Start:
 	;  Prueba con ciclos anidados
 	;-----------------------------
 	PerderTiempo:
-		LDI R17, 0xFF	; Primero se le carga b'1111111 al registro R17
+		LDI R17, 100	; Primero se le carga 100 al registro R17
 
 	Delay_ext:
-		LDI R18, 0xFF	; EL Delay que engloba al interior, empieza por encender todos los bits a R18 too
+		LDI R18, 250	; EL Delay que engloba al interior, empieza por encender todos los bits a R18 too
+	Delay_2:
+		LDI R19, 250
 
 	Delay_int:
-		DEC R18		; Se decrementa el registro R18
+		DEC R19		; Se decrementa el registro R19
 
 	
 
-		BRNE Delay_int; Cuando R18 llega a cero, entonces salta nuevamene al ciclo interno Y decrecementa R17. 
+		BRNE Delay_int; Cuando R18 llega a cero, entonces salta nuevamene al ciclo interno Y decrecementa R18. 
+		DEC R18
+		BRNE Delay_2;
 		DEC R17
 		BRNE Delay_ext; Cuando el registro R17 llega a cero, salta al externo.
 		
