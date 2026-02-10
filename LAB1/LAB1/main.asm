@@ -41,32 +41,32 @@ OUT     SPH, R17
 SETUP:
     ; ----- PUERTO B -----; PB0–PB3 como salidas. LEDs para mi contador 1 
 	; En este caso Pb0 es menos significativo. 
-	LDI r16, 0b0001111
-	OUT DDRB, r16
+	LDI r17, 0b0001111
+	OUT DDRB, r17
 
 	; Inicialmente apagar LEDs--- Así  estará apagado hasta de inicio
-	LDI r16, 0x00
-	OUT PORTB, r16; Aqui les doy el apagon
+	LDI r17, 0x00
+	OUT PORTB, r17; Aqui les doy el apagon
 
 
 	; ----- PUERTO C -----; PC0 y PC1 como entradas (botones)
-	LDI r16, 0b0000000
-	OUT DDRC, r16
+	LDI r17, 0b0000000
+	OUT DDRC, r17
 
 	; Activar pull-up internos en PC0 y PC1.
-	LDI r16, 0b0000011; recordar que es lógica inversa.
-	OUT PORTC, r16
+	LDI r17, 0b0000011; recordar que es lógica inversa.
+	OUT PORTC, r17
 
 
 	; ----- PUERTO D -----
 	; PD1 como salida (LED de carry) En este caso  D2 será donde esté el led, por ahora.
 	; En todo caso solo se cambairia a pd0 en caso de ser necesario. 
 	LDI r16, 0b0000100
-	OUT DDRD, r16
+	OUT DDRD, r17
 
 	; Apagar LED de carry al inicio.
 	LDI r16, 0x00
-	OUT PORTD, r16
+	OUT PORTD, r17
 
 	;------------------
 	CLR Contador1; limpio contador
