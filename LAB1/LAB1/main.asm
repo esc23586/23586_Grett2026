@@ -60,6 +60,12 @@ START:
     ldi Temp, 0b00001011      ; PC0, PC1, PC3 pull-up
     out PORTC, Temp
 
+	; ----LEDs de resultado en PORTD--
+    ldi Temp, 0b00001111
+    out DDRD, Temp
+    clr Temp
+    out PORTD, Temp
+
     ; ---Inicializar contadores---
     clr Temp
     sts Contador1, Temp
