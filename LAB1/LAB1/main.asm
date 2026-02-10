@@ -73,74 +73,99 @@ START:
 // Loop Infinito
 MAIN_LOOP:
 
-; A partir de aqui r16 solo será para mi contador en binario
-; Lectura de las entradas, en el registro de r17
+; Lectura de las entradas, en el registro de r17 variable temporal
+;========= CAMBIO DE CONTADOR (PC3) =========
+    sbic PINC, PC3
+    rjmp CHECK_INC
 
-	 sbic PINC, PC0
-	 rjmp MAIN_LOOP
-	 rjmp BOTON1_PRESIONADO
-	;Por ello hay que revisar la bandera z puesto que esta será 1. osea z==1
+    rcall DELAY_REBOTE
+    rcall SAVE_CONTADOR
 
-	/*
-	IN  R17, PINC; Leo Nuevamente el estado actual de los pines C
-	ANDI R17,  0b00000010 ; Aqui leo PC1
-	BREQ BOTON2_PRESIONADO   ; mismo que en linea 85
-    RJMP MAIN_LOOP
-	*/
-;------Cuando el botón esté presionado-----------
-; incrementar
-BOTON1_PRESIONADO:
-	RCALL DELAY_REBOTE ; evitamos el botonazo
+    ldi Temp, 1
+    eor Sel, Temp           ; alternar contador
 
-    INC Contador1 ;Incrementar
-	ANDI Contador1, 0x0F   ; limitar a 4 bits osea los primeros 4 encendidos
-    RCALL MOSTRAR; Se  manda el dato al port B. y se debería mostrar en los leds 
-	
-ESPERAR_SOLTAR_INC:
-	SBIS PINC, PC0
-    RJMP ESPERAR_SOLTAR_INC
+WAIT_SEL:
+    sbis PINC, PC3
+    rjmp WAIT_SEL
+    rcall DELAY_REBOTE
 
-	RCALL DELAY_REBOTE; solo por curiosidad, tal vez es demaciado rapido u algo. 
-	RJMP MAIN_LOOP
+    rcall LOAD_CONTADOR
+    rcall MOSTRAR
+    rjmp MAIN_LOOP          ; <<< CLAVE: salir del ciclo
 
-/*
-; Decrementar
-BOTON2_PRESIONADO:
-	RCALL DELAY_REBOTE ; evitamos el botonazo
+;========= INCREMENTAR (PC0) =========
+CHECK_INC:
+    sbic PINC, PC0 ;------Cuando el botón esté presionado
+    rjmp CHECK_DEC
 
-    CPI Contador1, 0;decrementar
-    BREQ NO_DECREMENTAR
-    DEC Contador1
+    rcall DELAY_REBOTE
+    inc Contador
+    andi Contador, 0x0F
+    rcall MOSTRAR
+    rcall SAVE_CONTADOR
 
-NO_DECREMENTAR:
-    OUT PORTB, Contador1; AQUI debería de haber un reflejo.
-	 
-ESPERAR_SOLTAR_DEC:
-    SBIS PINC, PC1
-    RJMP ESPERAR_SOLTAR_DEC
+WAIT_INC:
+    sbis PINC, PC0
+    rjmp WAIT_INC
+    rcall DELAY_REBOTE
+    rjmp MAIN_LOOP
 
-    RJMP MAIN_LOOP
+;========= DECREMENTAR (PC1) =========
+CHECK_DEC:
+    sbic PINC, PC1
+    rjmp MAIN_LOOP
+
+    rcall DELAY_REBOTE
+    tst Contador
+    breq NO_DEC
+    dec Contador
+
+NO_DEC:
+    rcall MOSTRAR
+    rcall SAVE_CONTADOR
+
+WAIT_DEC:
+    sbis PINC, PC1
+    rjmp WAIT_DEC
+    rcall DELAY_REBOTE
+    rjmp MAIN_LOOP
 */
 /****************************************/
 
 
 // NON-Interrupt subroutines
+LOAD_CONTADOR:
+    tst Sel
+    brne LOAD_C2
+    lds Contador, Contador1
+    ret
+LOAD_C2:
+    lds Contador, Contador2
+    ret
+
+SAVE_CONTADOR:
+    tst Sel
+    brne SAVE_C2
+    sts Contador1, Contador
+    ret
+SAVE_C2:
+    sts Contador2, Contador
+    ret
+
 MOSTRAR:
-    mov Temp, Contador1
-    andi Temp, 0x0F
-    out PORTB, Temp
+    out PORTB, Contador
     ret
 /****************************************/
 // Interrupt routines
 DELAY_REBOTE:
-    LDI d1, 100
-Ciclo1:
-    LDI d2, 100
-Ciclo2:
-    DEC d2
-    BRNE Ciclo2
-    DEC d1
-    BRNE Ciclo1
-    RET
+    ldi D1, 100
+D1_LOOP:
+    ldi D2, 100
+D2_LOOP:
+    dec D2
+    brne D2_LOOP
+    dec D1
+    brne D1_LOOP
+    ret
 
 /****************************************/
