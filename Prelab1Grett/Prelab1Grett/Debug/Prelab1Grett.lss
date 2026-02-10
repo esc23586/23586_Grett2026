@@ -1,10 +1,10 @@
 
-AVRASM ver. 2.2.8  C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\Prelab1Grett\Prelab1Grett\main.asm Tue Feb 03 12:48:08 2026
+AVRASM ver. 2.2.8  C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\Prelab1Grett\Prelab1Grett\main.asm Tue Feb 10 12:24:27 2026
 
 [builtin](2): Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\avrasm\inc\m328Pdef.inc'
-C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\Prelab1Grett\Prelab1Grett\main.asm(15): Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\avrasm\inc\M328PDEF.inc'
+C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\Prelab1Grett\Prelab1Grett\main.asm(16): Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\avrasm\inc\M328PDEF.inc'
 [builtin](2): Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\avrasm\inc\m328Pdef.inc'
-C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\Prelab1Grett\Prelab1Grett\main.asm(15): Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\avrasm\inc\M328PDEF.inc'
+C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\Prelab1Grett\Prelab1Grett\main.asm(16): Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\avrasm\inc\M328PDEF.inc'
                                  
                                  /*
                                  
@@ -987,9 +987,10 @@ C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\Prelab1Grett\Prelab1
                                  
                                  ; ***** END OF FILE ******************************************************
                                  
-                                 * Prelab1Grett.asm
+                                 * LAB1.asm
                                  *
                                  * Creado:  03 de Febrero 2026
+                                 * Corregido 10 de Febrerro 2026
                                  * Autor : Grettel Escobedo
                                  * Descripción: Contador binario de 4 bits con antirrebote y led de carry
                                  *		Cuenta según "Contador 1" los pulsos del botón, ya sea incrementar o decrementar. 
@@ -1052,122 +1053,131 @@ C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\Prelab1Grett\Prelab1
                                  
                                  
                                  .def Contador1 = r16
-                                 .def Temp =		r17
-                                 .def D1 =	r18
-                                 .def D2 =	r19
+                                 .def Temp	=	r17
+                                 .def D1		=	r18
+                                 .def D2		=	r19
                                  
                                  .org 0x0000
                                  
-000000 9488                      CLC; LIMPIO CARRY
-                                  /****************************************/
+000000 c000                      RJMP START
+                                 ;=========================================
+                                 
+                                 /****************************************/
+                                 START:
+                                  
                                  // Configuración de la pila
-000001 ef0f                      LDI     R16, LOW(RAMEND)
-000002 bf0d                      OUT     SPL, R16
-000003 e008                      LDI     R16, HIGH(RAMEND)
-000004 bf0e                      OUT     SPH, R16
+000001 ef1f                      	LDI     R17, LOW(RAMEND)
+000002 bf1d                      	OUT     SPL, R17
+000003 e018                      	LDI     R17, HIGH(RAMEND)
+000004 bf1e                      	OUT     SPH, R17
                                  /****************************************/
                                  // Configuracion MCU (Entradas y Salidas)
                                  
-                                 SETUP:
                                      ; ----- PUERTO B -----; PB0–PB3 como salidas. LEDs para mi contador 1 
                                  	; En este caso Pb0 es menos significativo. 
-000005 e00f                      	LDI r16, 0b00001111
-000006 b904                      	OUT DDRB, r16
+000005 e01f                      	LDI Temp, 0b00001111
+000006 b914                      	OUT DDRB, Temp
                                  
                                  	; Inicialmente apagar LEDs--- Así  estará apagado hasta de inicio
-000007 e000                      	LDI r16, 0x00
-000008 b905                      	OUT PORTB, r16; Aqui les doy el apagon
+000007 e010                      	LDI Temp, 0x00
+000008 b915                      	OUT PORTB, Temp; Aqui les doy el apagon
                                  
                                  
                                  	; ----- PUERTO C -----; PC0 y PC1 como entradas (botones)
-000009 e000                      	LDI r16, 0b00000000
-00000a b907                      	OUT DDRC, r16
-                                 
+000009 9838                      	cbi DDRC, PC0
                                  	; Activar pull-up internos en PC0 y PC1.
-00000b e003                      	LDI r16, 0b00000011; recordar qeu es lógica inversa.
-00000c b908                      	OUT PORTC, r16
-                                 
+00000a 9a40                          sbi PORTC, PC0        
                                  
                                  	; ----- PUERTO D -----
-                                 	; PD1 como salida (LED de carry) En este caso  D1 será donde esté el led, por ahora.
+                                 	; PD1 como salida (LED de carry) En este caso  D2 será donde esté el led, por ahora.
                                  	; En todo caso solo se cambairia a pd0 en caso de ser necesario. 
-00000d e002                      	LDI r16, 0b00000010
-00000e b90a                      	OUT DDRD, r16
+                                 	/*
+                                 	LDI r17, 0b00000100
+                                 	OUT DDRD, r17
                                  
                                  	; Apagar LED de carry al inicio.
-00000f e000                      	LDI r16, 0x00
-000010 b90b                      	OUT PORTD, r16
+                                 	LDI r17, 0x00
+                                 	OUT PORTD, r17
                                  
                                  	;------------------
-000011 2700                      	CLR Contador1; limpio contador
-                                 	
-                                 	
+                                 	*/
+00000b 2700                      	clr Contador1          ; contador = 0
+00000c d00b                          rcall MOSTRAR
                                  	
                                  /****************************************/
                                  // Loop Infinito
                                  MAIN_LOOP:
+                                 
                                  ; A partir de aqui r16 solo será para mi contador en binario
                                  ; Lectura de las entradas, en el registro de r17
-000012 b116                      	IN  R17, PINC; Leo el estado actual de los pines C
-000013 7011                          ANDI R17, 0b00000001    ; leer PC0 
-000014 f021                          BREQ BOTON1_PRESIONADO   ; si es 0 ? presionado inc
                                  
-000015 b116                      	IN  R17, PINC; Leo Nuevamente el estado actual de los pines C
-000016 7012                      	ANDI R17,  0b00000010 ; Aqui leo PC1
-000017 f041                      	BREQ BOTON2_PRESIONADO   ; si es 0 ? presionado dec
+00000d 9930                      	 sbic PINC, PC0
+00000e cffe                      	 rjmp MAIN_LOOP
+00000f c000                      	 rjmp BOTON1_PRESIONADO
+                                 	;Por ello hay que revisar la bandera z puesto que esta será 1. osea z==1
                                  
-000018 cff9                          RJMP MAIN_LOOP
-                                 
+                                 	/*
+                                 	IN  R17, PINC; Leo Nuevamente el estado actual de los pines C
+                                 	ANDI R17,  0b00000010 ; Aqui leo PC1
+                                 	BREQ BOTON2_PRESIONADO   ; mismo que en linea 85
+                                     RJMP MAIN_LOOP
+                                 	*/
                                  ;------Cuando el botón esté presionado-----------
                                  ; incrementar
                                  BOTON1_PRESIONADO:
-000019 d00f                      	RCALL DELAY_REBOTE ; evitamos el botonazo
+000010 d00b                      	RCALL DELAY_REBOTE ; evitamos el botonazo
                                  
-00001a 9503                          INC Contador1 ;Incrementar
-00001b 700f                          ANDI Contador1, 0b00001111   ; limitar a 4 bits
-00001c b905                          OUT PORTB, Contador1
+000011 9503                          INC Contador1 ;Incrementar
+000012 700f                      	ANDI Contador1, 0x0F   ; limitar a 4 bits osea los primeros 4 encendidos
+000013 d004                          RCALL MOSTRAR; Se  manda el dato al port B. y se debería mostrar en los leds 
                                  	
-                                 	ESPERAR_SOLTAR_INC:
-00001d b116                          IN Temp, PINC
-00001e 7011                          ANDI Temp, 0b00000001
-00001f f3e9                          BREQ ESPERAR_SOLTAR_INC
+                                 ESPERAR_SOLTAR_INC:
+000014 9b30                      	SBIS PINC, PC0
+000015 cffe                          RJMP ESPERAR_SOLTAR_INC
                                  
+000016 d005                      	RCALL DELAY_REBOTE; solo por curiosidad, tal vez es demaciado rapido u algo. 
+000017 cff5                      	RJMP MAIN_LOOP
                                  
+                                 /*
                                  ; Decrementar
                                  BOTON2_PRESIONADO:
-000020 d008                      	RCALL DELAY_REBOTE ; evitamos el botonazo
+                                 	RCALL DELAY_REBOTE ; evitamos el botonazo
                                  
-000021 3000                          CPI Contador1, 0;decrementar
-000022 f009                          BREQ NO_DECREMENTAR
-000023 950a                          DEC Contador1
+                                     CPI Contador1, 0;decrementar
+                                     BREQ NO_DECREMENTAR
+                                     DEC Contador1
                                  
                                  NO_DECREMENTAR:
-000024 b905                          OUT PORTB, Contador1
-                                 
+                                     OUT PORTB, Contador1; AQUI debería de haber un reflejo.
+                                 	 
                                  ESPERAR_SOLTAR_DEC:
-000025 b116                          IN Temp, PINC
-000026 7012                          ANDI Temp, 0b00000010
-000027 f3e9                          BREQ ESPERAR_SOLTAR_DEC
-000028 cfe9                          RJMP    MAIN_LOOP
+                                     SBIS PINC, PC1
+                                     RJMP ESPERAR_SOLTAR_DEC
+                                 
+                                     RJMP MAIN_LOOP
+                                 */
                                  /****************************************/
                                  
                                  
                                  // NON-Interrupt subroutines
-                                 
+                                 MOSTRAR:
+000018 2f10                          mov Temp, Contador1
+000019 701f                          andi Temp, 0x0F
+00001a b915                          out PORTB, Temp
+00001b 9508                          ret
                                  /****************************************/
                                  // Interrupt routines
                                  DELAY_REBOTE:
-000029 e624                          LDI d1, 100
+00001c e624                          LDI d1, 100
                                  Ciclo1:
-00002a ef3f                          LDI d2, 255
+00001d e634                          LDI d2, 100
                                  Ciclo2:
-00002b 953a                          DEC d2
-00002c f7f1                          BRNE Ciclo2
-00002d 952a                          DEC d1
-00002e f7d9                          BRNE Ciclo1
-00002f 9508                          RET
+00001e 953a                          DEC d2
+00001f f7f1                          BRNE Ciclo2
+000020 952a                          DEC d1
+000021 f7d9                          BRNE Ciclo1
+000022 9508                          RET
                                  
-                                 /****************************************/
 
 
 RESOURCE USE INFORMATION
@@ -1187,37 +1197,37 @@ counted separately from r26..r31 here.
 "ATmega328P" register use summary:
 x  :   0 y  :   0 z  :   0 r0 :   0 r1 :   0 r2 :   0 r3 :   0 r4 :   0 
 r5 :   0 r6 :   0 r7 :   0 r8 :   0 r9 :   0 r10:   0 r11:   0 r12:   0 
-r13:   0 r14:   0 r15:   0 r16:  23 r17:   8 r18:   2 r19:   2 r20:   0 
+r13:   0 r14:   0 r15:   0 r16:   4 r17:  11 r18:   2 r19:   2 r20:   0 
 r21:   0 r22:   0 r23:   0 r24:   0 r25:   0 r26:   0 r27:   0 r28:   0 
 r29:   0 r30:   0 r31:   0 
 Registers used: 4 out of 35 (11.4%)
 
 "ATmega328P" instruction use summary:
 .lds  :   0 .sts  :   0 adc   :   0 add   :   0 adiw  :   0 and   :   0 
-andi  :   5 asr   :   0 bclr  :   0 bld   :   0 brbc  :   0 brbs  :   0 
-brcc  :   0 brcs  :   0 break :   0 breq  :   5 brge  :   0 brhc  :   0 
+andi  :   2 asr   :   0 bclr  :   0 bld   :   0 brbc  :   0 brbs  :   0 
+brcc  :   0 brcs  :   0 break :   0 breq  :   0 brge  :   0 brhc  :   0 
 brhs  :   0 brid  :   0 brie  :   0 brlo  :   0 brlt  :   0 brmi  :   0 
 brne  :   2 brpl  :   0 brsh  :   0 brtc  :   0 brts  :   0 brvc  :   0 
-brvs  :   0 bset  :   0 bst   :   0 call  :   0 cbi   :   0 cbr   :   0 
-clc   :   1 clh   :   0 cli   :   0 cln   :   0 clr   :   1 cls   :   0 
+brvs  :   0 bset  :   0 bst   :   0 call  :   0 cbi   :   1 cbr   :   0 
+clc   :   0 clh   :   0 cli   :   0 cln   :   0 clr   :   1 cls   :   0 
 clt   :   0 clv   :   0 clz   :   0 com   :   0 cp    :   0 cpc   :   0 
-cpi   :   1 cpse  :   0 dec   :   3 eor   :   0 fmul  :   0 fmuls :   0 
-fmulsu:   0 icall :   0 ijmp  :   0 in    :   4 inc   :   1 jmp   :   0 
-ld    :   0 ldd   :   0 ldi   :  10 lds   :   0 lpm   :   0 lsl   :   0 
-lsr   :   0 mov   :   0 movw  :   0 mul   :   0 muls  :   0 mulsu :   0 
-neg   :   0 nop   :   0 or    :   0 ori   :   0 out   :  10 pop   :   0 
-push  :   0 rcall :   2 ret   :   1 reti  :   0 rjmp  :   2 rol   :   0 
-ror   :   0 sbc   :   0 sbci  :   0 sbi   :   0 sbic  :   0 sbis  :   0 
+cpi   :   0 cpse  :   0 dec   :   2 eor   :   0 fmul  :   0 fmuls :   0 
+fmulsu:   0 icall :   0 ijmp  :   0 in    :   0 inc   :   1 jmp   :   0 
+ld    :   0 ldd   :   0 ldi   :   6 lds   :   0 lpm   :   0 lsl   :   0 
+lsr   :   0 mov   :   1 movw  :   0 mul   :   0 muls  :   0 mulsu :   0 
+neg   :   0 nop   :   0 or    :   0 ori   :   0 out   :   5 pop   :   0 
+push  :   0 rcall :   4 ret   :   2 reti  :   0 rjmp  :   5 rol   :   0 
+ror   :   0 sbc   :   0 sbci  :   0 sbi   :   1 sbic  :   1 sbis  :   1 
 sbiw  :   0 sbr   :   0 sbrc  :   0 sbrs  :   0 sec   :   0 seh   :   0 
 sei   :   0 sen   :   0 ser   :   0 ses   :   0 set   :   0 sev   :   0 
 sez   :   0 sleep :   0 spm   :   0 st    :   0 std   :   0 sts   :   0 
 sub   :   0 subi  :   0 swap  :   0 tst   :   0 wdr   :   0 
-Instructions used: 14 out of 113 (12.4%)
+Instructions used: 15 out of 113 (13.3%)
 
 "ATmega328P" memory use summary [bytes]:
 Segment   Begin    End      Code   Data   Used    Size   Use%
 ---------------------------------------------------------------
-[.cseg] 0x000000 0x000060     96      0     96   32768   0.3%
+[.cseg] 0x000000 0x000046     70      0     70   32768   0.2%
 [.dseg] 0x000100 0x000100      0      0      0    2048   0.0%
 [.eseg] 0x000000 0x000000      0      0      0    1024   0.0%
 
