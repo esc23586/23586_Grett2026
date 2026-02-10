@@ -31,9 +31,9 @@
 CLC; LIMPIO CARRY
  /****************************************/
 // Configuración de la pila
-LDI     R16, LOW(RAMEND)
+LDI     R17, LOW(RAMEND)
 OUT     SPL, R17
-LDI     R16, HIGH(RAMEND)
+LDI     R17, HIGH(RAMEND)
 OUT     SPH, R17
 /****************************************/
 // Configuracion MCU (Entradas y Salidas)
