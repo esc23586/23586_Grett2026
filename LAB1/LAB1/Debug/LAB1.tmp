@@ -23,15 +23,13 @@
   <FILE>LAB1.lss</FILE>
  </OUTPUT_FILES>
  <LABELS>
-  <SETUP><FILE>C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB1\LAB1\main.asm</FILE><LINE>41</LINE></SETUP>
+  <START><FILE>C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB1\LAB1\main.asm</FILE><LINE>35</LINE></START>
+  <MOSTRAR><FILE>C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB1\LAB1\main.asm</FILE><LINE>132</LINE></MOSTRAR>
   <MAIN_LOOP><FILE>C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB1\LAB1\main.asm</FILE><LINE>78</LINE></MAIN_LOOP>
-  <BOTON1_PRESIONADO><FILE>C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB1\LAB1\main.asm</FILE><LINE>92</LINE></BOTON1_PRESIONADO>
-  <BOTON2_PRESIONADO><FILE>C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB1\LAB1\main.asm</FILE><LINE>107</LINE></BOTON2_PRESIONADO>
-  <DELAY_REBOTE><FILE>C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB1\LAB1\main.asm</FILE><LINE>130</LINE></DELAY_REBOTE>
-  <ESPERAR_SOLTAR_INC><FILE>C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB1\LAB1\main.asm</FILE><LINE>99</LINE></ESPERAR_SOLTAR_INC>
-  <NO_DECREMENTAR><FILE>C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB1\LAB1\main.asm</FILE><LINE>114</LINE></NO_DECREMENTAR>
-  <ESPERAR_SOLTAR_DEC><FILE>C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB1\LAB1\main.asm</FILE><LINE>116</LINE></ESPERAR_SOLTAR_DEC>
-  <Ciclo1><FILE>C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB1\LAB1\main.asm</FILE><LINE>132</LINE></Ciclo1>
-  <Ciclo2><FILE>C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB1\LAB1\main.asm</FILE><LINE>134</LINE></Ciclo2>
+  <BOTON1_PRESIONADO><FILE>C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB1\LAB1\main.asm</FILE><LINE>96</LINE></BOTON1_PRESIONADO>
+  <DELAY_REBOTE><FILE>C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB1\LAB1\main.asm</FILE><LINE>139</LINE></DELAY_REBOTE>
+  <ESPERAR_SOLTAR_INC><FILE>C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB1\LAB1\main.asm</FILE><LINE>103</LINE></ESPERAR_SOLTAR_INC>
+  <Ciclo1><FILE>C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB1\LAB1\main.asm</FILE><LINE>141</LINE></Ciclo1>
+  <Ciclo2><FILE>C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB1\LAB1\main.asm</FILE><LINE>143</LINE></Ciclo2>
  </LABELS>
 </ASSEMBLER_INFO>

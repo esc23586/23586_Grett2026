@@ -22,87 +22,92 @@
 
 
 .def Contador1 = r16
-.def Temp =	r17
-.def D1 =	r18
-.def D2 =	r19
+.def Temp	=	r17
+.def D1		=	r18
+.def D2		=	r19
 
 .org 0x0000
 
-CLC; LIMPIO CARRY
- /****************************************/
+RJMP START
+;=========================================
+
+/****************************************/
+START:
+ 
 // Configuración de la pila
-LDI     R17, LOW(RAMEND)
-OUT     SPL, R17
-LDI     R17, HIGH(RAMEND)
-OUT     SPH, R17
+	LDI     R17, LOW(RAMEND)
+	OUT     SPL, R17
+	LDI     R17, HIGH(RAMEND)
+	OUT     SPH, R17
 /****************************************/
 // Configuracion MCU (Entradas y Salidas)
 
-SETUP:
     ; ----- PUERTO B -----; PB0–PB3 como salidas. LEDs para mi contador 1 
 	; En este caso Pb0 es menos significativo. 
-	LDI r17, 0b0001111
-	OUT DDRB, r17
+	LDI Temp, 0b00001111
+	OUT DDRB, Temp
 
 	; Inicialmente apagar LEDs--- Así  estará apagado hasta de inicio
-	LDI r17, 0x00
-	OUT PORTB, r17; Aqui les doy el apagon
+	LDI Temp, 0x00
+	OUT PORTB, Temp; Aqui les doy el apagon
 
 
 	; ----- PUERTO C -----; PC0 y PC1 como entradas (botones)
-	LDI r17, 0b0000000
-	OUT DDRC, r17
-
+	cbi DDRC, PC0
 	; Activar pull-up internos en PC0 y PC1.
-	LDI r17, 0b0000011; recordar que es lógica inversa.
-	OUT PORTC, r17
-
+    sbi PORTC, PC0        
 
 	; ----- PUERTO D -----
 	; PD1 como salida (LED de carry) En este caso  D2 será donde esté el led, por ahora.
 	; En todo caso solo se cambairia a pd0 en caso de ser necesario. 
-	LDI r16, 0b0000100
+	/*
+	LDI r17, 0b00000100
 	OUT DDRD, r17
 
 	; Apagar LED de carry al inicio.
-	LDI r16, 0x00
+	LDI r17, 0x00
 	OUT PORTD, r17
 
 	;------------------
-	CLR Contador1; limpio contador
-	
-	
+	*/
+	clr Contador1          ; contador = 0
+    rcall MOSTRAR
 	
 /****************************************/
 // Loop Infinito
 MAIN_LOOP:
+
 ; A partir de aqui r16 solo será para mi contador en binario
 ; Lectura de las entradas, en el registro de r17
-	IN  R17, PINC; Leo el estado actual de los pines C
-    ANDI R17, 0b0000001    ; leer PC0 
-    BRNE BOTON1_PRESIONADO   ; si es 0 ? presionado inc
 
+	 sbic PINC, PC0
+	 rjmp MAIN_LOOP
+	 rjmp BOTON1_PRESIONADO
+	;Por ello hay que revisar la bandera z puesto que esta será 1. osea z==1
+
+	/*
 	IN  R17, PINC; Leo Nuevamente el estado actual de los pines C
-	ANDI R17,  0b0000010 ; Aqui leo PC1
-	BRNE BOTON2_PRESIONADO   ; si es 0 ? presionado dec
+	ANDI R17,  0b00000010 ; Aqui leo PC1
+	BREQ BOTON2_PRESIONADO   ; mismo que en linea 85
     RJMP MAIN_LOOP
-
+	*/
 ;------Cuando el botón esté presionado-----------
 ; incrementar
 BOTON1_PRESIONADO:
 	RCALL DELAY_REBOTE ; evitamos el botonazo
 
     INC Contador1 ;Incrementar
-  //  ANDI Contador1, 0b0001111   ; limitar a 4 bits
-    OUT PORTB, Contador1; Se  manda el dato al port B. 
+	ANDI Contador1, 0x0F   ; limitar a 4 bits osea los primeros 4 encendidos
+    RCALL MOSTRAR; Se  manda el dato al port B. y se debería mostrar en los leds 
 	
 ESPERAR_SOLTAR_INC:
-    IN Temp, PINC
-    ANDI Temp, 0b0000001
-    BRNE ESPERAR_SOLTAR_INC
+	SBIS PINC, PC0
+    RJMP ESPERAR_SOLTAR_INC
 
+	RCALL DELAY_REBOTE; solo por curiosidad, tal vez es demaciado rapido u algo. 
 	RJMP MAIN_LOOP
 
+/*
 ; Decrementar
 BOTON2_PRESIONADO:
 	RCALL DELAY_REBOTE ; evitamos el botonazo
@@ -112,19 +117,23 @@ BOTON2_PRESIONADO:
     DEC Contador1
 
 NO_DECREMENTAR:
-    OUT PORTB, Contador1; AQUI debería de haber un reflejo. 
+    OUT PORTB, Contador1; AQUI debería de haber un reflejo.
+	 
 ESPERAR_SOLTAR_DEC:
-    IN Temp, PINC
-    ANDI Temp, 0b0000010; Cuando de cero, es porqué está presionado.
-    BRNE ESPERAR_SOLTAR_DEC
-
+    SBIS PINC, PC1
+    RJMP ESPERAR_SOLTAR_DEC
 
     RJMP MAIN_LOOP
+*/
 /****************************************/
 
 
 // NON-Interrupt subroutines
-
+MOSTRAR:
+    mov Temp, Contador1
+    andi Temp, 0x0F
+    out PORTB, Temp
+    ret
 /****************************************/
 // Interrupt routines
 DELAY_REBOTE:
