@@ -6,7 +6,7 @@
 * Autor : Grettel Escobedo
 * Descripción: Contador binario de 4 bits con antirrebote y led de carry
 *		Cuenta según "Contador 1" los pulsos del botón, ya sea incrementar o decrementar. 
-*		Según esto, cuenta en binario y al haber overflow o underflow enciende carry.
+*		Según esto, cuenta en binario 
 */
 
 
@@ -24,6 +24,7 @@
 .def D1       = r18
 .def D2       = r19
 .def Sel      = r20      ; 0 = Contador1, 1 = Contador2
+.def Resultado = r21
 
 /******** SRAM ********/
 .dseg
@@ -57,7 +58,7 @@ START:
     ;------- Botones en PORTC---------
     clr Temp
     out DDRC, Temp
-    ldi Temp, 0b00001011      ; PC0, PC1, PC3 pull-up
+    ldi Temp, 0b00011011   ; PC0, PC1, PC3, PC4 pull-up
     out PORTC, Temp
 
 	; ----LEDs de resultado en PORTD--
@@ -80,7 +81,30 @@ START:
 MAIN_LOOP:
 
 ; Lectura de las entradas, en el registro de r17 variable temporal
+;========= SUMA CONTADOR1 + CONTADOR2 (PC4) =========
+    sbic PINC, PC4
+    rjmp CHECK_SEL
+
+    rcall DELAY_REBOTE
+
+    lds Temp, Contador1
+    lds Resultado, Contador2
+    add Temp, Resultado
+    andi Temp, 0x0F
+    out PORTD, Temp
+
+WAIT_SUM:
+    sbis PINC, PC4
+    rjmp WAIT_SUM
+    rcall DELAY_REBOTE
+
+    clr Temp
+    out PORTD, Temp
+    rjmp MAIN_LOOP
+
+
 ;========= CAMBIO DE CONTADOR (PC3) =========
+CHECK_SEL:
     sbic PINC, PC3
     rjmp CHECK_INC
 
@@ -88,7 +112,7 @@ MAIN_LOOP:
     rcall SAVE_CONTADOR
 
     ldi Temp, 1
-    eor Sel, Temp           ; alternar contador
+    eor Sel, Temp
 
 WAIT_SEL:
     sbis PINC, PC3
@@ -97,11 +121,12 @@ WAIT_SEL:
 
     rcall LOAD_CONTADOR
     rcall MOSTRAR
-    rjmp MAIN_LOOP          ; <<< CLAVE: salir del ciclo
+    rjmp MAIN_LOOP
+
 
 ;========= INCREMENTAR (PC0) =========
 CHECK_INC:
-    sbic PINC, PC0 ;------Cuando el botón esté presionado
+    sbic PINC, PC0
     rjmp CHECK_DEC
 
     rcall DELAY_REBOTE
@@ -115,6 +140,7 @@ WAIT_INC:
     rjmp WAIT_INC
     rcall DELAY_REBOTE
     rjmp MAIN_LOOP
+
 
 ;========= DECREMENTAR (PC1) =========
 CHECK_DEC:
@@ -135,7 +161,7 @@ WAIT_DEC:
     rjmp WAIT_DEC
     rcall DELAY_REBOTE
     rjmp MAIN_LOOP
-*/
+
 /****************************************/
 
 
