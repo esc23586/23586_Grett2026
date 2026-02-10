@@ -18,14 +18,19 @@
 .org    SRAM_START
 //variable_name:     .byte   1   // Memory alocation for variable_name:     .byte   (byte size)
 
+/******** DEFINICIONES ********/
+.def Contador = r16
+.def Temp     = r17
+.def D1       = r18
+.def D2       = r19
+.def Sel      = r20      ; 0 = Contador1, 1 = Contador2
+
+/******** SRAM ********/
+.dseg
+Contador1: .byte 1
+Contador2: .byte 1
+
 .cseg
-
-
-.def Contador1 = r16
-.def Temp	=	r17
-.def D1		=	r18
-.def D2		=	r19
-
 .org 0x0000
 
 RJMP START
@@ -42,35 +47,26 @@ START:
 /****************************************/
 // Configuracion MCU (Entradas y Salidas)
 
-    ; ----- PUERTO B -----; PB0–PB3 como salidas. LEDs para mi contador 1 
+	;  ; ----- PUERTO B -----; PB0–PB3 como salidas. LEDs para mi contador 1 
 	; En este caso Pb0 es menos significativo. 
-	LDI Temp, 0b00001111
-	OUT DDRB, Temp
+    ldi Temp, 0b00001111
+    out DDRB, Temp
+    clr Temp
+    out PORTB, Temp
 
-	; Inicialmente apagar LEDs--- Así  estará apagado hasta de inicio
-	LDI Temp, 0x00
-	OUT PORTB, Temp; Aqui les doy el apagon
+    ;------- Botones en PORTC---------
+    clr Temp
+    out DDRC, Temp
+    ldi Temp, 0b00001011      ; PC0, PC1, PC3 pull-up
+    out PORTC, Temp
 
-
-	; ----- PUERTO C -----; PC0 y PC1 como entradas (botones)
-	cbi DDRC, PC0
-	; Activar pull-up internos en PC0 y PC1.
-    sbi PORTC, PC0        
-
-	; ----- PUERTO D -----
-	; PD1 como salida (LED de carry) En este caso  D2 será donde esté el led, por ahora.
-	; En todo caso solo se cambairia a pd0 en caso de ser necesario. 
-	/*
-	LDI r17, 0b00000100
-	OUT DDRD, r17
-
-	; Apagar LED de carry al inicio.
-	LDI r17, 0x00
-	OUT PORTD, r17
-
+    ; ---Inicializar contadores---
+    clr Temp
+    sts Contador1, Temp
+    sts Contador2, Temp
+    clr Sel
 	;------------------
-	*/
-	clr Contador1          ; contador = 0
+    rcall LOAD_CONTADOR
     rcall MOSTRAR
 	
 /****************************************/
