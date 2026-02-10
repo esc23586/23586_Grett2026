@@ -32,9 +32,9 @@ CLC; LIMPIO CARRY
  /****************************************/
 // Configuración de la pila
 LDI     R16, LOW(RAMEND)
-OUT     SPL, R16
+OUT     SPL, R17
 LDI     R16, HIGH(RAMEND)
-OUT     SPH, R16
+OUT     SPH, R17
 /****************************************/
 // Configuracion MCU (Entradas y Salidas)
 
@@ -93,7 +93,7 @@ BOTON1_PRESIONADO:
 	RCALL DELAY_REBOTE ; evitamos el botonazo
 
     INC Contador1 ;Incrementar
-    ANDI Contador1, 0b0001111   ; limitar a 4 bits
+  //  ANDI Contador1, 0b0001111   ; limitar a 4 bits
     OUT PORTB, Contador1; Se  manda el dato al port B. 
 	
 ESPERAR_SOLTAR_INC:
@@ -115,7 +115,7 @@ NO_DECREMENTAR:
     OUT PORTB, Contador1; AQUI debería de haber un reflejo. 
 ESPERAR_SOLTAR_DEC:
     IN Temp, PINC
-    ANDI Temp, 0b0000010
+    ANDI Temp, 0b0000010; Cuando de cero, es porqué está presionado.
     BRNE ESPERAR_SOLTAR_DEC
 
 
