@@ -113,7 +113,8 @@ START:
 	clr ContadorLED
 
     rcall MOSTRAR
-
+;-----------------Me aseguro que r1 siempre sea 0 para la subrutina de MOSTRAR---------
+	clr r1
 
 /*********************************************************/
 // Loop Infinito
@@ -197,7 +198,7 @@ TIMER_OK:
     andi Temp, 0x0F
     out PORTB, Temp
     ret
-	*/
+	
 MOSTRAR:; 
     ; ---- LEDs ---- Ver si no da problemas
     mov Temp, ContadorLED
@@ -212,6 +213,28 @@ MOSTRAR:;
     lpm Temp, Z
     out PORTD, Temp; se muestra en el puerto D. 
     ret
+	*/
+
+MOSTRAR:
+
+    ; ---- LEDs (PORTB) ----
+    mov Temp, ContadorLED
+    andi Temp, 0x0F
+    out PORTB, Temp
+
+    ; ---- 7 segmentos (PORTD) ----
+    mov Temp, Contador7seg
+    andi Temp, 0x0F
+
+    ldi ZH, HIGH(Table7seg<<1)
+    ldi ZL, LOW(Table7seg<<1)
+    add ZL, Temp
+    adc ZH, r1
+    lpm Temp, Z
+    out PORTD, Temp
+
+    ret
+
 
 ;==============================
 ; SUBRUTINA ANTIRREBOTE:
