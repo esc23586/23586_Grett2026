@@ -1,5 +1,5 @@
 
-AVRASM ver. 2.2.8  C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB2\LAB2\main.asm Mon Feb 16 06:16:08 2026
+AVRASM ver. 2.2.8  C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB2\LAB2\main.asm Mon Feb 16 06:55:04 2026
 
 [builtin](2): Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\avrasm\inc\m328Pdef.inc'
 C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB2\LAB2\main.asm(18): Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\avrasm\inc\M328PDEF.inc'
@@ -1063,6 +1063,8 @@ C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB2
                                  .def Temp          = r17
                                  .def D1            = r18
                                  .def D2            = r19
+                                 .def AlarmaTiempo  = r21; fueron agregadas para un mejor manejo de la alrma
+                                 .def AlarmaActiva  = r22; para el timepo de espera de la alarma encendida
                                  
                                  
                                  
@@ -1149,57 +1151,59 @@ C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB2
                                  ;========================
 00001f 2744                          clr Contador7seg
 000020 2700                      	clr ContadorLED
+000021 2755                      	clr AlarmaTiempo; agregados para el postlab
+000022 2766                      	clr AlarmaActiva; agregados para el postlab
                                  
-000021 d032                          rcall MOSTRAR
+000023 d037                          rcall MOSTRAR
                                  ;-----------------Me aseguro que r1 siempre sea 0 para la subrutina de MOSTRAR---------
-000022 2411                      	clr r1
+000024 2411                      	clr r1
                                  
                                  /*********************************************************/
                                  // Loop Infinito
                                  MAIN_LOOP:
                                  
                                  ;========= BOTÓN INC =========
-000023 9930                          sbic PINC, PC0				; si no esta presionado--- salta a la siguiente
-000024 c00a                          rjmp CHECK_DEC				; En caso no esta presionado dec, entonces salta
+000025 9930                          sbic PINC, PC0				; si no esta presionado--- salta a la siguiente
+000026 c00a                          rjmp CHECK_DEC				; En caso no esta presionado dec, entonces salta
                                  
-000025 d03a                          rcall DELAY_REBOTE			; mi antirrebote
+000027 d042                          rcall DELAY_REBOTE			; mi antirrebote
                                  
-000026 9543                          inc Contador7seg				; se  incrementa
+000028 9543                          inc Contador7seg				; se  incrementa
                                  	; se busca que cuabndo este llegue a 16 este regrese a cero
-000027 3140                          cpi Contador7seg, 16
-000028 f008                          brlo INC_OK					; si es menor que 16 salta a mostrar el incremento
-000029 2744                          clr Contador7seg				; overflow
+000029 3140                          cpi Contador7seg, 16
+00002a f008                          brlo INC_OK					; si es menor que 16 salta a mostrar el incremento
+00002b 2744                          clr Contador7seg				; overflow
                                  INC_OK:
-00002a d029                          rcall MOSTRAR; este es el reflejo en mi contador
+00002c d02e                          rcall MOSTRAR; este es el reflejo en mi contador
                                  
                                  WAIT_INC: ; aqui meramente solo espero a que se deje de presionar el botón para volver a leer.
-00002b 9b30                          sbis PINC, PC0
-00002c cffe                          rjmp WAIT_INC
-00002d d032                          rcall DELAY_REBOTE
-00002e cff4                          rjmp MAIN_LOOP
+00002d 9b30                          sbis PINC, PC0
+00002e cffe                          rjmp WAIT_INC
+00002f d03a                          rcall DELAY_REBOTE
+000030 cff4                          rjmp MAIN_LOOP
                                  
                                  ;========= BOTÓN DEC =========
                                  ; Misma logica que siempreee :D
                                  CHECK_DEC:
-00002f 9931                          sbic PINC, PC1
-000030 c00b                          rjmp TIMER_CHECK			; si no fue preisonado; salto a etiqueta.
+000031 9931                          sbic PINC, PC1
+000032 c00b                          rjmp TIMER_CHECK			; si no fue preisonado; salto a etiqueta.
                                  
-000031 d02e                          rcall DELAY_REBOTE			; en caso sí fue presionado
+000033 d036                          rcall DELAY_REBOTE			; en caso sí fue presionado
                                  
-000032 2344                          tst Contador7seg				;Stores one byte from a Register to the data space
-000033 f411                          brne DEC_OK					
-000034 e04f                          ldi Contador7seg, 15			 ; underflow
-000035 c001                          rjmp DEC_DONE				;
+000034 2344                          tst Contador7seg				;Stores one byte from a Register to the data space
+000035 f411                          brne DEC_OK					
+000036 e04f                          ldi Contador7seg, 15			 ; underflow
+000037 c001                          rjmp DEC_DONE				;
                                  DEC_OK:
-000036 954a                          dec Contador7seg
+000038 954a                          dec Contador7seg
                                  DEC_DONE:
-000037 d01c                          rcall MOSTRAR
+000039 d021                          rcall MOSTRAR
                                  
                                  WAIT_DEC:
-000038 9b31                          sbis PINC, PC1
-000039 cffe                          rjmp WAIT_DEC
-00003a d025                          rcall DELAY_REBOTE
-00003b cfe7                          rjmp MAIN_LOOP
+00003a 9b31                          sbis PINC, PC1
+00003b cffe                          rjmp WAIT_DEC
+00003c d02d                          rcall DELAY_REBOTE
+00003d cfe7                          rjmp MAIN_LOOP
                                  
                                  
                                  /****************************************/
@@ -1207,121 +1211,113 @@ C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB2
                                  
                                  ;========= TIMER0 =========
                                  TIMER_CHECK:
-00003c b315                          in Temp, TIFR0 ; revisa si ocurrio over, sino este sigue de largo
-00003d ff10                          sbrs Temp, TOV0
-00003e cfe4                          rjmp MAIN_LOOP
+00003e b315                          in Temp, TIFR0 ; revisa si ocurrio over, sino este sigue de largo
+00003f ff10                          sbrs Temp, TOV0
+000040 cfe4                          rjmp MAIN_LOOP
                                  
                                      ; limpiar flag overflow
-00003f e011                          ldi Temp, (1<<TOV0)
-000040 bb15                          out TIFR0, Temp
+000041 e011                          ldi Temp, (1<<TOV0)
+000042 bb15                          out TIFR0, Temp
                                  
-000041 9523                          inc D1
+000043 9523                          inc D1
                                  						;Esto era del lab: cpi D1, 98
-000042 302a                      	cpi D1, 10			; ahora cuenta 10 bloques de 100ms = 1s
-000043 f2f8                          brlo MAIN_LOOP		; si es menor salta
+000044 3624                      	cpi D1, 100			; ahora cuenta 10 bloques de 100ms = 1s
+000045 f2f8                          brlo MAIN_LOOP		; si es menor salta
                                  
-000044 2722                          clr D1				; En teoria ya paso 1 segundo, al ser 1000ms
-000045 9503                          inc ContadorLED
-000046 3100                          cpi ContadorLED, 16
+000046 2722                          clr D1				; En teoria ya paso 1 segundo, al ser 1000ms
+000047 9503                          inc ContadorLED
+000048 3100                          cpi ContadorLED, 16
                                  
-                                 	/* ESTA ERA PARTE DEL LAB:
+                                 	;(ESTA ERA PARTE DEL LAB)
+                                 	/*
                                      brlo TIMER_OK
                                      clr ContadorLED				  ; overflow
                                  TIMER_OK:
                                      rcall MOSTRAR
                                      rjmp MAIN_LOOP
                                  	*/
+                                 	
+000049 f008                      	brlo CONT_OK
+00004a 2700                      	clr ContadorLED
+                                 	CONT_OK:
                                  
-000047 f008                      	brlo NO_OVERFLOW
-000048 2700                      	clr ContadorLED
+                                 	; =============================
+                                 	; MANEJO DE ALARMA
+                                 	; =============================
                                  
-                                 NO_OVERFLOW:
+                                 	; Si alarma está activa
+00004b 2366                      	tst AlarmaActiva
+00004c f029                      	breq CHECK_DISPARO
                                  
-                                 	; ==============================
-                                 	; --- SECCIÓN DE ALARMA ---
-                                 	; ==============================
+                                 	; Si está activa, contar tiempo
+00004d 955a                      	dec AlarmaTiempo
+00004e f451                      	brne FIN_TIMER
                                  
-                                 	; Si display está en 0 ? no hay alarma
-000049 2344                      	tst Contador7seg
-00004a f031                      	breq ALARMA_OFF
+                                 	; Si llegó a 0 ? apagar alarma
+00004f 2766                      	clr AlarmaActiva
+000050 985f                      	cbi PORTD, 7
+000051 c007                      	rjmp FIN_TIMER
+                                 
+                                 	CHECK_DISPARO:
+                                 
+                                 	; Si display = 0 ? no hacer nada
+000052 2344                      	tst Contador7seg
+000053 f029                      	breq FIN_TIMER
                                  
                                  	; Comparar contadores
-00004b 1704                      	cp ContadorLED, Contador7seg
-00004c f421                      	brne ALARMA_OFF
+000054 1704                      	cp ContadorLED, Contador7seg
+000055 f419                      	brne FIN_TIMER
                                  
-                                 	; === SON IGUALES ===
-00004d 2722                      	clr D1						; reinicia mi contador base
-00004e 2733                      	clr D2						; si estás usando segundos acumulados
-00004f 9a5f                      	sbi PORTD, 7				; enciende PD7 (donde tengo mi buzzer jsjs)
-000050 c001                      	rjmp FIN_ALARMA
+                                 	; ===== DISPARO =====
+000056 2f54                      	mov AlarmaTiempo, Contador7seg
+000057 e061                      	ldi AlarmaActiva, 1
+000058 9a5f                      	sbi PORTD, 7
                                  
-                                 	ALARMA_OFF:
-000051 985f                      	cbi PORTD, 7        ; apaga PD7
-                                 
-                                 	FIN_ALARMA:
-                                 
-000052 d001                      	rcall MOSTRAR
-000053 cfcf                      	rjmp MAIN_LOOP
+                                 	FIN_TIMER:
+000059 d001                      	rcall MOSTRAR
+00005a cfca                      	rjmp MAIN_LOOP
                                  
                                  /****************************************/
                                  // -------Interrupt routines-----
                                  
-                                 /*MOSTRAR:
-                                     mov Temp, Contador
-                                     andi Temp, 0x0F
-                                     out PORTB, Temp
-                                     ret
-                                 	
-                                 MOSTRAR:; 
-                                     ; ---- LEDs ---- Ver si no da problemas
-                                     mov Temp, ContadorLED
-                                     andi Temp, 0x0F				 ; Revisar si la tabla sigue siendo la correcta, 
-                                     out PORTB, Temp
-                                 
-                                     ; ---- Display 7 segmentos ----
-                                     ldi ZH, HIGH(Table7seg<<1)
-                                     ldi ZL, LOW(Table7seg<<1)
-                                     add ZL, Temp
-                                     adc ZH, r1        ; r1 = 0
-                                     lpm Temp, Z
-                                     out PORTD, Temp; se muestra en el puerto D. 
-                                     ret
-                                 	*/
-                                 
                                  MOSTRAR:
                                  
                                      ; ---- LEDs (PORTB) ----
-000054 2f10                          mov Temp, ContadorLED
-000055 701f                          andi Temp, 0x0F
-000056 b915                          out PORTB, Temp
+00005b 2f10                          mov Temp, ContadorLED
+00005c 701f                          andi Temp, 0x0F
+00005d b915                          out PORTB, Temp
                                  
                                      ; ---- 7 segmentos (PORTD) ----
-000057 2f14                          mov Temp, Contador7seg
-000058 701f                          andi Temp, 0x0F
+00005e 2f14                          mov Temp, Contador7seg
+00005f 701f                          andi Temp, 0x0F
                                  
-000059 e0f0                          ldi ZH, HIGH(Table7seg<<1)
-00005a e0ea                          ldi ZL, LOW(Table7seg<<1)
-00005b 0fe1                          add ZL, Temp
-00005c 1df1                          adc ZH, r1
-00005d 9114                          lpm Temp, Z
-00005e b91b                          out PORTD, Temp
+000060 e0f0                          ldi ZH, HIGH(Table7seg<<1)
+000061 e0ea                          ldi ZL, LOW(Table7seg<<1)
+000062 0fe1                          add ZL, Temp
+000063 1df1                          adc ZH, r1
+000064 9114                          lpm Temp, Z
+                                     ;out PORTD, Temp
+000065 b17b                      	in r23, PORTD        ; lee estado actual
+000066 7870                      	andi r23, 0x80       ; conserva solo bit 7
+000067 2b17                      	or Temp, r23         ; mezcla display + alarma
+000068 b91b                      	out PORTD, Temp
                                  
-00005f 9508                          ret
+000069 9508                          ret
                                  
                                  
                                  ;==============================
                                  ; SUBRUTINA ANTIRREBOTE:
                                  ;==============================
                                  DELAY_REBOTE:
-000060 e624                          ldi D1, 100
+00006a e624                          ldi D1, 100
                                  DLY1:
-000061 e634                          ldi D2, 100
+00006b e634                          ldi D2, 100
                                  DLY2:
-000062 953a                          dec D2
-000063 f7f1                          brne DLY2
-000064 952a                          dec D1
-000065 f7d9                          brne DLY1
-000066 9508                          ret
+00006c 953a                          dec D2
+00006d f7f1                          brne DLY2
+00006e 952a                          dec D1
+00006f f7d9                          brne DLY1
+000070 9508                          ret
                                  
                                  /****************************************/
 
@@ -1343,37 +1339,37 @@ counted separately from r26..r31 here.
 "ATmega328P" register use summary:
 x  :   0 y  :   0 z  :   1 r0 :   0 r1 :   2 r2 :   0 r3 :   0 r4 :   0 
 r5 :   0 r6 :   0 r7 :   0 r8 :   0 r9 :   0 r10:   0 r11:   0 r12:   0 
-r13:   0 r14:   0 r15:   0 r16:   6 r17:  28 r18:   7 r19:   3 r20:  10 
-r21:   0 r22:   0 r23:   0 r24:   0 r25:   0 r26:   0 r27:   0 r28:   0 
+r13:   0 r14:   0 r15:   0 r16:   6 r17:  29 r18:   6 r19:   2 r20:  11 
+r21:   3 r22:   4 r23:   3 r24:   0 r25:   0 r26:   0 r27:   0 r28:   0 
 r29:   0 r30:   2 r31:   2 
-Registers used: 9 out of 35 (25.7%)
+Registers used: 12 out of 35 (34.3%)
 
 "ATmega328P" instruction use summary:
 .lds  :   0 .sts  :   0 adc   :   1 add   :   1 adiw  :   0 and   :   0 
-andi  :   2 asr   :   0 bclr  :   0 bld   :   0 brbc  :   0 brbs  :   0 
-brcc  :   0 brcs  :   0 break :   0 breq  :   1 brge  :   0 brhc  :   0 
+andi  :   3 asr   :   0 bclr  :   0 bld   :   0 brbc  :   0 brbs  :   0 
+brcc  :   0 brcs  :   0 break :   0 breq  :   2 brge  :   0 brhc  :   0 
 brhs  :   0 brid  :   0 brie  :   0 brlo  :   3 brlt  :   0 brmi  :   0 
-brne  :   4 brpl  :   0 brsh  :   0 brtc  :   0 brts  :   0 brvc  :   0 
+brne  :   5 brpl  :   0 brsh  :   0 brtc  :   0 brts  :   0 brvc  :   0 
 brvs  :   0 bset  :   0 bst   :   0 call  :   0 cbi   :   3 cbr   :   0 
-clc   :   0 clh   :   0 cli   :   0 cln   :   0 clr   :  11 cls   :   0 
+clc   :   0 clh   :   0 cli   :   0 cln   :   0 clr   :  12 cls   :   0 
 clt   :   0 clv   :   0 clz   :   0 com   :   0 cp    :   1 cpc   :   0 
-cpi   :   3 cpse  :   0 dec   :   3 eor   :   0 fmul  :   0 fmuls :   0 
-fmulsu:   0 icall :   0 ijmp  :   0 in    :   1 inc   :   3 jmp   :   0 
-ld    :   0 ldd   :   0 ldi   :  12 lds   :   0 lpm   :   2 lsl   :   0 
-lsr   :   0 mov   :   2 movw  :   0 mul   :   0 muls  :   0 mulsu :   0 
-neg   :   0 nop   :   0 or    :   0 ori   :   0 out   :  10 pop   :   0 
+cpi   :   3 cpse  :   0 dec   :   4 eor   :   0 fmul  :   0 fmuls :   0 
+fmulsu:   0 icall :   0 ijmp  :   0 in    :   2 inc   :   3 jmp   :   0 
+ld    :   0 ldd   :   0 ldi   :  13 lds   :   0 lpm   :   2 lsl   :   0 
+lsr   :   0 mov   :   3 movw  :   0 mul   :   0 muls  :   0 mulsu :   0 
+neg   :   0 nop   :   0 or    :   1 ori   :   0 out   :  10 pop   :   0 
 push  :   0 rcall :   8 ret   :   2 reti  :   0 rjmp  :  11 rol   :   0 
 ror   :   0 sbc   :   0 sbci  :   0 sbi   :   3 sbic  :   2 sbis  :   2 
 sbiw  :   0 sbr   :   0 sbrc  :   0 sbrs  :   1 sec   :   0 seh   :   0 
 sei   :   0 sen   :   0 ser   :   0 ses   :   0 set   :   0 sev   :   0 
 sez   :   0 sleep :   0 spm   :   0 st    :   0 std   :   0 sts   :   1 
-sub   :   0 subi  :   0 swap  :   0 tst   :   2 wdr   :   0 
-Instructions used: 26 out of 113 (23.0%)
+sub   :   0 subi  :   0 swap  :   0 tst   :   3 wdr   :   0 
+Instructions used: 27 out of 113 (23.9%)
 
 "ATmega328P" memory use summary [bytes]:
 Segment   Begin    End      Code   Data   Used    Size   Use%
 ---------------------------------------------------------------
-[.cseg] 0x000000 0x0000ce    190     16    206   32768   0.6%
+[.cseg] 0x000000 0x0000e2    210     16    226   32768   0.7%
 [.dseg] 0x000100 0x000100      0      0      0    2048   0.0%
 [.eseg] 0x000000 0x000000      0      0      0    1024   0.0%
 

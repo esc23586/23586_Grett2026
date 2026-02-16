@@ -32,6 +32,8 @@ Se hara caso omiso de D7, osea D7. por ello será 0b01111111.
 .def Temp          = r17
 .def D1            = r18
 .def D2            = r19
+.def AlarmaTiempo  = r21; fueron agregadas para un mejor manejo de la alrma
+.def AlarmaActiva  = r22; para el timepo de espera de la alarma encendida
 
 
 
@@ -111,6 +113,8 @@ START:
 ;========================
     clr Contador7seg
 	clr ContadorLED
+	clr AlarmaTiempo; agregados para el postlab
+	clr AlarmaActiva; agregados para el postlab
 
     rcall MOSTRAR
 ;-----------------Me aseguro que r1 siempre sea 0 para la subrutina de MOSTRAR---------
@@ -179,76 +183,64 @@ TIMER_CHECK:
 
     inc D1
 						;Esto era del lab: cpi D1, 98
-	cpi D1, 10			; ahora cuenta 10 bloques de 100ms = 1s
+	cpi D1, 100			; ahora cuenta 10 bloques de 100ms = 1s
     brlo MAIN_LOOP		; si es menor salta
 
     clr D1				; En teoria ya paso 1 segundo, al ser 1000ms
     inc ContadorLED
     cpi ContadorLED, 16
 
-	/* ESTA ERA PARTE DEL LAB:
+	;(ESTA ERA PARTE DEL LAB)
+	/*
     brlo TIMER_OK
     clr ContadorLED				  ; overflow
 TIMER_OK:
     rcall MOSTRAR
     rjmp MAIN_LOOP
 	*/
-
-	brlo NO_OVERFLOW
+	
+	brlo CONT_OK
 	clr ContadorLED
+	CONT_OK:
 
-NO_OVERFLOW:
+	; =============================
+	; MANEJO DE ALARMA
+	; =============================
 
-	; ==============================
-	; --- SECCIÓN DE ALARMA ---
-	; ==============================
+	; Si alarma está activa
+	tst AlarmaActiva
+	breq CHECK_DISPARO
 
-	; Si display está en 0 ? no hay alarma
+	; Si está activa, contar tiempo
+	dec AlarmaTiempo
+	brne FIN_TIMER
+
+	; Si llegó a 0 ? apagar alarma
+	clr AlarmaActiva
+	cbi PORTD, 7
+	rjmp FIN_TIMER
+
+	CHECK_DISPARO:
+
+	; Si display = 0 ? no hacer nada
 	tst Contador7seg
-	breq ALARMA_OFF
+	breq FIN_TIMER
 
 	; Comparar contadores
 	cp ContadorLED, Contador7seg
-	brne ALARMA_OFF
+	brne FIN_TIMER
 
-	; === SON IGUALES ===
-	clr D1						; reinicia mi contador base
-	clr D2						; si estás usando segundos acumulados
-	sbi PORTD, 7				; enciende PD7 (donde tengo mi buzzer jsjs)
-	rjmp FIN_ALARMA
+	; ===== DISPARO =====
+	mov AlarmaTiempo, Contador7seg
+	ldi AlarmaActiva, 1
+	sbi PORTD, 7
 
-	ALARMA_OFF:
-	cbi PORTD, 7        ; apaga PD7
-
-	FIN_ALARMA:
-
+	FIN_TIMER:
 	rcall MOSTRAR
 	rjmp MAIN_LOOP
 
 /****************************************/
 // -------Interrupt routines-----
-
-/*MOSTRAR:
-    mov Temp, Contador
-    andi Temp, 0x0F
-    out PORTB, Temp
-    ret
-	
-MOSTRAR:; 
-    ; ---- LEDs ---- Ver si no da problemas
-    mov Temp, ContadorLED
-    andi Temp, 0x0F				 ; Revisar si la tabla sigue siendo la correcta, 
-    out PORTB, Temp
-
-    ; ---- Display 7 segmentos ----
-    ldi ZH, HIGH(Table7seg<<1)
-    ldi ZL, LOW(Table7seg<<1)
-    add ZL, Temp
-    adc ZH, r1        ; r1 = 0
-    lpm Temp, Z
-    out PORTD, Temp; se muestra en el puerto D. 
-    ret
-	*/
 
 MOSTRAR:
 
@@ -266,7 +258,11 @@ MOSTRAR:
     add ZL, Temp
     adc ZH, r1
     lpm Temp, Z
-    out PORTD, Temp
+    ;out PORTD, Temp
+	in r23, PORTD        ; lee estado actual
+	andi r23, 0x80       ; conserva solo bit 7
+	or Temp, r23         ; mezcla display + alarma
+	out PORTD, Temp
 
     ret
 
