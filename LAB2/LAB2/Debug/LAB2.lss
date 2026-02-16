@@ -1,10 +1,10 @@
 
-AVRASM ver. 2.2.8  C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB2\LAB2\main.asm Tue Feb 10 16:12:49 2026
+AVRASM ver. 2.2.8  C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB2\LAB2\main.asm Mon Feb 16 05:17:43 2026
 
 [builtin](2): Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\avrasm\inc\m328Pdef.inc'
-C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB2\LAB2\main.asm(17): Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\avrasm\inc\M328PDEF.inc'
+C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB2\LAB2\main.asm(18): Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\avrasm\inc\M328PDEF.inc'
 [builtin](2): Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\avrasm\inc\m328Pdef.inc'
-C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB2\LAB2\main.asm(17): Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\avrasm\inc\M328PDEF.inc'
+C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB2\LAB2\main.asm(18): Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\avrasm\inc\M328PDEF.inc'
                                  
                                  /*
                                  
@@ -1001,6 +1001,7 @@ C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB2
                                  * En el post lab se busca el funcionamiento del prelab con el post lab
                                  */
                                  /****************************************/
+                                 
                                  // Encabezado (Definición de Registros, Variables y Constantes)
                                  .include "M328PDEF.inc"     // Include definitions specific to ATMega328P
                                  
@@ -1050,25 +1051,28 @@ C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB2
                                  .org    SRAM_START
                                  //variable_name:     .byte   1   // Memory alocation for variable_name:     .byte   (byte size)
                                  .cseg
-                                 
                                  /****************************************/
+                                 
                                  
                                  // Configuracion MCU
                                  ;========================
                                  ; Registros
                                  ;========================
-                                 .def Contador = r16
-                                 .def Temp     = r17
-                                 .def D1       = r18    ; contador de overflows
-                                 .def D2       = r19
+                                 .def ContadorLED   = r16
+                                 .def Contador7seg  = r20
+                                 .def Temp          = r17
+                                 .def D1            = r18
+                                 .def D2            = r19
+                                 
                                  
                                  
                                  .org 0x0000
 000000 c000                       rjmp START
-                                 
                                  ;========================
+                                 
                                   /****************************************/
                                  // Configuración de la pila
+                                 
                                  START:
                                  ;---- Stack ----
 000001 ef1f                          ldi Temp, LOW(RAMEND)
@@ -1077,7 +1081,8 @@ C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB2
 000004 bf1e                          out SPH, Temp
                                  
                                  ;========================================================
-                                 ; //Tablita para los valores del display
+                                 ; Tablita para los valores del display
+                                 ;========================================================
                                  ; revisar si no me afecta el que no utilizaré letras
                                  	Table7seg:	
 000005 063f
@@ -1093,6 +1098,8 @@ C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB2
                                  ; ---Puertos- MCU--- Salidas y Entradas.
                                  ;==========================================================
                                  
+                                 
+                                 ;CONTADOR (PreLAB):
                                  ; Se establece como salidas puerto B salidas (LEDs)
 00000d e01f                          ldi Temp, 0b00001111
 00000e b914                          out DDRB, Temp
@@ -1101,25 +1108,31 @@ C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB2
 00000f 2711                          clr Temp
 000010 b915                          out PORTB, Temp
                                  
-                                 ; ----------PC0 y PC1 entradas con pull-up-----
-                                 ; lo hago de esta forma porque es más rapido, además me trajo complicaciones con la asignación de binario
-000011 9838                          cbi DDRC, PC0
+                                 ; INC/DEC (LAB2):
+                                 ; ---------PC0 y PC1 entradas con pull-up-----
+                                 ; Lo hago de esta forma porque es más rapido, además me trajo complicaciones con la asignación de binario.
+                                 
+000011 9838                          cbi DDRC, PC0				; clear bit, voy a la dirección y le digo que es 0
 000012 9839                          cbi DDRC, PC1
-                                 	; se acrtiva los pullup
-000013 9a40                          sbi PORTC, PC0
+                                 	; se activan los pullup
+000013 9a40                          sbi PORTC, PC0				; le asigno 1, para que se active
 000014 9a41                          sbi PORTC, PC1
                                  
                                  ; --------------Configuración de los Pines para el puerto D-----
-000015 e71f                      	LDi Temp, 0b01111111
-000016 b91a                      	out DDRD, Temp
-000017 2711                      	clr Temp
-000018 b91b                      	OUT PORTD,Temp
+000015 ef1f                      	LDi Temp, 0xFF				;0b11111111, se activaron todos, debido a que se usará el utlimo para la alarma.
+000016 b91a                      	OUT DDRD, Temp				; Se les asigna a la dirección
+000017 2711                      	CLR Temp					; limpio mi variable (setear a cero)
+000018 b91b                      	OUT PORTD,Temp				; Les mando 0 voltios para empezar. 
                                  
-                                 ;================================================================
-                                 ; Esta es la desactivación de UART
+                                 
+                                 
+                                 ;------------Esta es la desactivación de UART------------------
                                  ;Para la parte de desactivación para la comunicación de RX Y TX 
 000019 e010                      	LDI Temp,  0x00
 00001a 9310 00c1                 	STS UCSR0B, Temp
+                                 
+                                 
+                                 
                                  ;========================
                                  ; Timer0 : Esta es la parte del binario.
                                  ;========================
@@ -1128,62 +1141,65 @@ C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB2
 00001c e013                          ldi Temp, (1<<CS01)|(1<<CS00)
 00001d bd15                          out TCCR0B, Temp
                                  
-00001e 2722                          clr D1            ; contador de cuantos overflows van ocurriendo. 
+00001e 2722                          clr D1						; contador de cuantos overflows van ocurriendo. 
                                  
                                  
                                  ;========================
-                                 ; Inicialización para mi contador, aqui se muestra que esta en clr
+                                 ; Inicialización para mis contadores, aqui se muestra que está en clr
                                  ;========================
-00001f 2700                          clr Contador
-000020 d028                          rcall MOSTRAR
+00001f 2744                          clr Contador7seg
+000020 2700                      	clr ContadorLED
                                  
+000021 d029                          rcall MOSTRAR
+                                 ;-----------------Me aseguro que r1 siempre sea 0 para la subrutina de MOSTRAR---------
+000022 2411                      	clr r1
                                  
-                                 /****************************************/
+                                 /*********************************************************/
                                  // Loop Infinito
                                  MAIN_LOOP:
                                  
                                  ;========= BOTÓN INC =========
-000021 9930                          sbic PINC, PC0; si no esta presionado--- salta a la siguiente
-000022 c00a                          rjmp CHECK_DEC
+000023 9930                          sbic PINC, PC0				; si no esta presionado--- salta a la siguiente
+000024 c00a                          rjmp CHECK_DEC				; En caso no esta presionado dec, entonces salta
                                  
-000023 d02f                          rcall DELAY_REBOTE; mi antirrebote
+000025 d031                          rcall DELAY_REBOTE			; mi antirrebote
                                  
-000024 9503                          inc Contador; se  incrementa
+000026 9543                          inc Contador7seg				; se  incrementa
                                  	; se busca que cuabndo este llegue a 16 este regrese a cero
-000025 3100                          cpi Contador, 16
-000026 f008                          brlo INC_OK
-000027 2700                          clr Contador          ; overflow
+000027 3140                          cpi Contador7seg, 16
+000028 f008                          brlo INC_OK					; si es menor que 16 salta a mostrar el incremento
+000029 2744                          clr Contador7seg				; overflow
                                  INC_OK:
-000028 d020                          rcall MOSTRAR; en teoria este es el reflejo en mi contador
+00002a d020                          rcall MOSTRAR; este es el reflejo en mi contador
                                  
                                  WAIT_INC: ; aqui meramente solo espero a que se deje de presionar el botón para volver a leer.
-000029 9b30                          sbis PINC, PC0
-00002a cffe                          rjmp WAIT_INC
-00002b d027                          rcall DELAY_REBOTE
-00002c cff4                          rjmp MAIN_LOOP
+00002b 9b30                          sbis PINC, PC0
+00002c cffe                          rjmp WAIT_INC
+00002d d029                          rcall DELAY_REBOTE
+00002e cff4                          rjmp MAIN_LOOP
                                  
                                  ;========= BOTÓN DEC =========
-                                 ; Misma lógica que al incrementar
+                                 ; Misma logica que siempreee :D
                                  CHECK_DEC:
-00002d 9931                          sbic PINC, PC1
-00002e c00b                          rjmp TIMER_CHECK
+00002f 9931                          sbic PINC, PC1
+000030 c00b                          rjmp TIMER_CHECK			; si no fue preisonado; salto a etiqueta.
                                  
-00002f d023                          rcall DELAY_REBOTE
+000031 d025                          rcall DELAY_REBOTE			; en caso sí fue presionado
                                  
-000030 2300                          tst Contador
-000031 f411                          brne DEC_OK
-000032 e00f                          ldi Contador, 15      ; underflow
-000033 c001                          rjmp DEC_DONE
+000032 2344                          tst Contador7seg				;Stores one byte from a Register to the data space
+000033 f411                          brne DEC_OK					
+000034 e04f                          ldi Contador7seg, 15			 ; underflow
+000035 c001                          rjmp DEC_DONE				;
                                  DEC_OK:
-000034 950a                          dec Contador
+000036 954a                          dec Contador7seg
                                  DEC_DONE:
-000035 d013                          rcall MOSTRAR
+000037 d013                          rcall MOSTRAR
                                  
                                  WAIT_DEC:
-000036 9b31                          sbis PINC, PC1
-000037 cffe                          rjmp WAIT_DEC
-000038 d01a                          rcall DELAY_REBOTE
-000039 cfe7                          rjmp MAIN_LOOP
+000038 9b31                          sbis PINC, PC1
+000039 cffe                          rjmp WAIT_DEC
+00003a d01c                          rcall DELAY_REBOTE
+00003b cfe7                          rjmp MAIN_LOOP
                                  
                                  
                                  /****************************************/
@@ -1191,26 +1207,26 @@ C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB2
                                  
                                  ;========= TIMER0 =========
                                  TIMER_CHECK:
-00003a b315                          in Temp, TIFR0 ; revisa si ocurrio over, sino este sigue de largo
-00003b ff10                          sbrs Temp, TOV0
-00003c cfe4                          rjmp MAIN_LOOP
+00003c b315                          in Temp, TIFR0 ; revisa si ocurrio over, sino este sigue de largo
+00003d ff10                          sbrs Temp, TOV0
+00003e cfe4                          rjmp MAIN_LOOP
                                  
-                                     ; limpiar flag overflow, en teoria aqui deberia de limpiarse pero no lo hace.
-00003d e011                          ldi Temp, (1<<TOV0)
-00003e bb15                          out TIFR0, Temp
+                                     ; limpiar flag overflow
+00003f e011                          ldi Temp, (1<<TOV0)
+000040 bb15                          out TIFR0, Temp
                                  
-00003f 9523                          inc D1
-000040 3622                          cpi D1, 98
-000041 f2f8                          brlo MAIN_LOOP
+000041 9523                          inc D1
+000042 3622                          cpi D1, 98; compara
+000043 f2f8                          brlo MAIN_LOOP ; si es menor salta
                                  
-000042 2722                          clr D1
-000043 9503                          inc Contador
-000044 3100                          cpi Contador, 16
-000045 f008                          brlo TIMER_OK
-000046 2700                          clr Contador          ; overflow
+000044 2722                          clr D1
+000045 9503                          inc ContadorLED
+000046 3100                          cpi ContadorLED, 16
+000047 f008                          brlo TIMER_OK
+000048 2700                          clr ContadorLED				  ; overflow
                                  TIMER_OK:
-000047 d001                          rcall MOSTRAR
-000048 cfd8                          rjmp MAIN_LOOP
+000049 d001                          rcall MOSTRAR
+00004a cfd8                          rjmp MAIN_LOOP
                                  
                                  /****************************************/
                                  // -------Interrupt routines-----
@@ -1220,34 +1236,57 @@ C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB2
                                      andi Temp, 0x0F
                                      out PORTB, Temp
                                      ret
-                                 	*/
+                                 	
                                  MOSTRAR:; 
                                      ; ---- LEDs ---- Ver si no da problemas
-000049 2f10                          mov Temp, Contador
-00004a 701f                          andi Temp, 0x0F       ; Revisar si la tabla sigue siendo la correcta, 
-00004b b915                          out PORTB, Temp
+                                     mov Temp, ContadorLED
+                                     andi Temp, 0x0F				 ; Revisar si la tabla sigue siendo la correcta, 
+                                     out PORTB, Temp
                                  
                                      ; ---- Display 7 segmentos ----
-00004c e0f0                           ldi ZH, HIGH(Table7seg<<1)
-00004d e0ea                          ldi ZL, LOW(Table7seg<<1)
-00004e 0fe1                          add ZL, Temp
-00004f 1df1                          adc ZH, r1        ; r1 = 0
-000050 9114                          lpm Temp, Z
-000051 b91b                          out PORTD, Temp
-000052 9508                          ret
+                                     ldi ZH, HIGH(Table7seg<<1)
+                                     ldi ZL, LOW(Table7seg<<1)
+                                     add ZL, Temp
+                                     adc ZH, r1        ; r1 = 0
+                                     lpm Temp, Z
+                                     out PORTD, Temp; se muestra en el puerto D. 
+                                     ret
+                                 	*/
+                                 
+                                 MOSTRAR:
+                                 
+                                     ; ---- LEDs (PORTB) ----
+00004b 2f10                          mov Temp, ContadorLED
+00004c 701f                          andi Temp, 0x0F
+00004d b915                          out PORTB, Temp
+                                 
+                                     ; ---- 7 segmentos (PORTD) ----
+00004e 2f14                          mov Temp, Contador7seg
+00004f 701f                          andi Temp, 0x0F
+                                 
+000050 e0f0                          ldi ZH, HIGH(Table7seg<<1)
+000051 e0ea                          ldi ZL, LOW(Table7seg<<1)
+000052 0fe1                          add ZL, Temp
+000053 1df1                          adc ZH, r1
+000054 9114                          lpm Temp, Z
+000055 b91b                          out PORTD, Temp
+                                 
+000056 9508                          ret
                                  
                                  
-                                 ; Delay antirrebote---- Subrutina. 
+                                 ;==============================
+                                 ; SUBRUTINA ANTIRREBOTE:
+                                 ;==============================
                                  DELAY_REBOTE:
-000053 e624                          ldi D1, 100
+000057 e624                          ldi D1, 100
                                  DLY1:
-000054 e634                          ldi D2, 100
+000058 e634                          ldi D2, 100
                                  DLY2:
-000055 953a                          dec D2
-000056 f7f1                          brne DLY2
-000057 952a                          dec D1
-000058 f7d9                          brne DLY1
-000059 9508                          ret
+000059 953a                          dec D2
+00005a f7f1                          brne DLY2
+00005b 952a                          dec D1
+00005c f7d9                          brne DLY1
+00005d 9508                          ret
                                  
                                  /****************************************/
 
@@ -1267,26 +1306,26 @@ counted separately from r26..r31 here.
 .dseg memory usage only counts static data declared with .byte
 
 "ATmega328P" register use summary:
-x  :   0 y  :   0 z  :   1 r0 :   0 r1 :   1 r2 :   0 r3 :   0 r4 :   0 
+x  :   0 y  :   0 z  :   1 r0 :   0 r1 :   2 r2 :   0 r3 :   0 r4 :   0 
 r5 :   0 r6 :   0 r7 :   0 r8 :   0 r9 :   0 r10:   0 r11:   0 r12:   0 
-r13:   0 r14:   0 r15:   0 r16:  11 r17:  26 r18:   6 r19:   2 r20:   0 
+r13:   0 r14:   0 r15:   0 r16:   5 r17:  28 r18:   6 r19:   2 r20:   8 
 r21:   0 r22:   0 r23:   0 r24:   0 r25:   0 r26:   0 r27:   0 r28:   0 
 r29:   0 r30:   2 r31:   2 
-Registers used: 8 out of 35 (22.9%)
+Registers used: 9 out of 35 (25.7%)
 
 "ATmega328P" instruction use summary:
 .lds  :   0 .sts  :   0 adc   :   1 add   :   1 adiw  :   0 and   :   0 
-andi  :   1 asr   :   0 bclr  :   0 bld   :   0 brbc  :   0 brbs  :   0 
+andi  :   2 asr   :   0 bclr  :   0 bld   :   0 brbc  :   0 brbs  :   0 
 brcc  :   0 brcs  :   0 break :   0 breq  :   0 brge  :   0 brhc  :   0 
 brhs  :   0 brid  :   0 brie  :   0 brlo  :   3 brlt  :   0 brmi  :   0 
 brne  :   3 brpl  :   0 brsh  :   0 brtc  :   0 brts  :   0 brvc  :   0 
 brvs  :   0 bset  :   0 bst   :   0 call  :   0 cbi   :   2 cbr   :   0 
-clc   :   0 clh   :   0 cli   :   0 cln   :   0 clr   :   7 cls   :   0 
+clc   :   0 clh   :   0 cli   :   0 cln   :   0 clr   :   9 cls   :   0 
 clt   :   0 clv   :   0 clz   :   0 com   :   0 cp    :   0 cpc   :   0 
 cpi   :   3 cpse  :   0 dec   :   3 eor   :   0 fmul  :   0 fmuls :   0 
 fmulsu:   0 icall :   0 ijmp  :   0 in    :   1 inc   :   3 jmp   :   0 
 ld    :   0 ldd   :   0 ldi   :  12 lds   :   0 lpm   :   2 lsl   :   0 
-lsr   :   0 mov   :   1 movw  :   0 mul   :   0 muls  :   0 mulsu :   0 
+lsr   :   0 mov   :   2 movw  :   0 mul   :   0 muls  :   0 mulsu :   0 
 neg   :   0 nop   :   0 or    :   0 ori   :   0 out   :  10 pop   :   0 
 push  :   0 rcall :   8 ret   :   2 reti  :   0 rjmp  :  10 rol   :   0 
 ror   :   0 sbc   :   0 sbci  :   0 sbi   :   2 sbic  :   2 sbis  :   2 
@@ -1299,7 +1338,7 @@ Instructions used: 24 out of 113 (21.2%)
 "ATmega328P" memory use summary [bytes]:
 Segment   Begin    End      Code   Data   Used    Size   Use%
 ---------------------------------------------------------------
-[.cseg] 0x000000 0x0000b4    164     16    180   32768   0.5%
+[.cseg] 0x000000 0x0000bc    172     16    188   32768   0.6%
 [.dseg] 0x000100 0x000100      0      0      0    2048   0.0%
 [.eseg] 0x000000 0x000000      0      0      0    1024   0.0%
 
