@@ -109,7 +109,7 @@ START:
 ;========================
 ; Inicialización para mi contador, aqui se muestra que está en clr
 ;========================
-    clr Contador
+    clr Contador7seg
     rcall MOSTRAR
 
 
@@ -123,11 +123,11 @@ MAIN_LOOP:
 
     rcall DELAY_REBOTE			; mi antirrebote
 
-    inc Contador				; se  incrementa
+    inc Contador7seg				; se  incrementa
 	; se busca que cuabndo este llegue a 16 este regrese a cero
-    cpi Contador, 16
+    cpi Contador7seg, 16
     brlo INC_OK					; si es menor que 16 salta a mostrar el incremento
-    clr Contador				; overflow
+    clr Contador7seg				; overflow
 INC_OK:
     rcall MOSTRAR; este es el reflejo en mi contador
 
@@ -145,12 +145,12 @@ CHECK_DEC:
 
     rcall DELAY_REBOTE			; en caso sí fue presionado
 
-    tst Contador				;Stores one byte from a Register to the data space
+    tst Contador7seg				;Stores one byte from a Register to the data space
     brne DEC_OK					
-    ldi Contador, 15			 ; underflow
+    ldi Contador7seg, 15			 ; underflow
     rjmp DEC_DONE				;
 DEC_OK:
-    dec Contador
+    dec Contador7seg
 DEC_DONE:
     rcall MOSTRAR
 
@@ -179,10 +179,10 @@ TIMER_CHECK:
     brlo MAIN_LOOP ; si es menor salta
 
     clr D1
-    inc Contador
-    cpi Contador, 16
+    inc ContadorLED
+    cpi ContadorLED, 16
     brlo TIMER_OK
-    clr Contador				  ; overflow
+    clr ContadorLED				  ; overflow
 TIMER_OK:
     rcall MOSTRAR
     rjmp MAIN_LOOP
@@ -198,7 +198,7 @@ TIMER_OK:
 	*/
 MOSTRAR:; 
     ; ---- LEDs ---- Ver si no da problemas
-    mov Temp, Contador
+    mov Temp, ContadorLED
     andi Temp, 0x0F				 ; Revisar si la tabla sigue siendo la correcta, 
     out PORTB, Temp
 
