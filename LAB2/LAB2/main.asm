@@ -178,10 +178,11 @@ TIMER_CHECK:
     out TIFR0, Temp
 
     inc D1
-    cpi D1, 98; compara
-    brlo MAIN_LOOP ; si es menor salta
+						;Esto era del lab: cpi D1, 98
+	cpi D1, 10			; ahora cuenta 10 bloques de 100ms = 1s
+    brlo MAIN_LOOP		; si es menor salta
 
-    clr D1
+    clr D1				; En teoria ya paso 1 segundo, al ser 1000ms
     inc ContadorLED
     cpi ContadorLED, 16
     brlo TIMER_OK
