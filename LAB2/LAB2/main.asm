@@ -107,9 +107,11 @@ START:
 
 
 ;========================
-; Inicialización para mi contador, aqui se muestra que está en clr
+; Inicialización para mis contadores, aqui se muestra que está en clr
 ;========================
     clr Contador7seg
+	clr ContadorLED
+
     rcall MOSTRAR
 
 
