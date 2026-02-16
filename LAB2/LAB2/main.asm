@@ -185,11 +185,45 @@ TIMER_CHECK:
     clr D1				; En teoria ya paso 1 segundo, al ser 1000ms
     inc ContadorLED
     cpi ContadorLED, 16
+
+	/* ESTA ERA PARTE DEL LAB:
     brlo TIMER_OK
     clr ContadorLED				  ; overflow
 TIMER_OK:
     rcall MOSTRAR
     rjmp MAIN_LOOP
+	*/
+
+	brlo NO_OVERFLOW
+	clr ContadorLED
+
+NO_OVERFLOW:
+
+	; ==============================
+	; --- SECCIÓN DE ALARMA ---
+	; ==============================
+
+	; Si display está en 0 ? no hay alarma
+	tst Contador7seg
+	breq ALARMA_OFF
+
+	; Comparar contadores
+	cp ContadorLED, Contador7seg
+	brne ALARMA_OFF
+
+	; === SON IGUALES ===
+	clr D1						; reinicia mi contador base
+	clr D2						; si estás usando segundos acumulados
+	sbi PORTD, 7				; enciende PD7 (donde tengo mi buzzer jsjs)
+	rjmp FIN_ALARMA
+
+	ALARMA_OFF:
+	cbi PORTD, 7        ; apaga PD7
+
+	FIN_ALARMA:
+
+	rcall MOSTRAR
+	rjmp MAIN_LOOP
 
 /****************************************/
 // -------Interrupt routines-----
