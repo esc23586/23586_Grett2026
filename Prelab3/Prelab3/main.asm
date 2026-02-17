@@ -107,18 +107,8 @@ SETUP:
 // Loop Infinito
 MAIN_LOOP:
     RJMP    MAIN_LOOP
-/****************************************/
+/*********************************************+*/
 // NON-Interrupt subroutines
-MOSTRAR:
-
-    ; ---- LEDs (PORTB) ----
-    mov Temp, ContadorLED
-    andi Temp, 0x0F
-    out PORTB, Temp
-
-	RET
-
-
 
 ;==============================
 ; SUBRUTINA ANTIRREBOTE:
@@ -135,8 +125,43 @@ DLY2:
     ret
 
 
-/****************************************/
-// Interrupt routines
+/******************************************************/
+
+// Interrupt routines:
+;========================
+; ISR
+;========================
+PCINT_ISR:
+
+    in temp, PINC
+
+;----- Botón PC0 (Incrementar) -----
+    sbrs temp, 0      ; Si bit 0 = 1 lo salta
+    rcall INCREMENTAR
+
+;----- Botón PC1 (Decrementar) -----
+    sbrs temp, 1
+    rcall DECREMENTAR
+
+    reti
+
+;========================
+; INCREMENTAR
+;========================
+INCREMENTAR:
+    inc contador
+    andi contador, 0x0F   ; Limitar a 4 bits
+    out PORTB, contador
+    ret
+
+;========================
+; DECREMENTAR
+;========================
+DECREMENTAR:
+    dec contador
+    andi contador, 0x0F
+    out PORTB, contador
+    ret
 
 
 /****************************************/
