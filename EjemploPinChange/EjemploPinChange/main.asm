@@ -2,7 +2,7 @@
 ; ClaseInterrupciones.asm
 /*
 * Creado: 
-* Autor : 
+* Autor : PEDROO
 * Descripción: 
 */
 /****************************************/
