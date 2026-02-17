@@ -8,7 +8,10 @@
 *Parte del laboratorio: Implementar un contador en hexa de 4 bits utilizando una interrupción del TMR0. 
 *La interrupción del TMR0 deberá ser entre 5 y 20ms, pero el contador deberá cambiar cada 1000ms. 
 *Muestre el contador con el TMR0 en un display de 7 segmentos, de manera que se muestre el conteo en segundos.
-*Se espera que la vuelta del overflow sea, igual a 50. De esta manera se dara una cada segundo. 
+*Se espera que la vuelta del overflow sea. De esta manera se dara una cada segundo.
+
+; Según la logica del prescaler que utilizo, en teoria da 61 overflows de hecho
+ 
 */
 /****************************************/
 // Encabezado (Definición de Registros, Variables y Constantes)
@@ -20,10 +23,15 @@
 ; Registros
 ;========================
 	.def ContadorLED   = r16
-	;.def Contador7seg  = r20
 	.def Temp          = r17
 	.def D1            = r18
 	.def D2            = r19
+	;Parte del  Lab y Post:
+
+	.def TimerCount = r20
+	.def BCD_Unidad = r21
+	.def BCD_Decena = r22
+
 
 .org 0x0000; Se incia aqui para guardar.
 	rjmp SETUP
@@ -41,7 +49,7 @@
  /****************************************/
 // Configuración de la pila
 SETUP:
-	cli
+	cli; Desactivo las interrupciones.
 
 	LDI     R16, LOW(RAMEND)
 	OUT     SPL, R16
@@ -52,11 +60,11 @@ SETUP:
 ;========================================================
 ; Tablita para los valores del display
 ;========================================================
-; revisar si no me afecta el que no utilizaré letras
-/*
+; revisar si rompe el códgio. ojalá no.
+
 	Table7seg:	
 		.DB	0x3F, 0x06, 0x5B, 0x4F, 0x66, 0x6D, 0x7D, 0x07, 0x7F, 0x67, 0x77, 0x7C, 0x39, 0x5E, 0x79, 0x71
-		*/
+		
 
 /****************************************/
 //  ---Puertos- MCU--- Salidas y Entradas.
@@ -76,7 +84,7 @@ SETUP:
 
     cbi DDRC, PC0				; clear bit, voy a la dirección y le digo que es 0
     cbi DDRC, PC1
-	; se activan los pullup
+	; Se activan los pullup
     sbi PORTC, PC0				; le asigno 1, para que se active
     sbi PORTC, PC1
 
@@ -89,14 +97,12 @@ SETUP:
     ldi temp, (1<<PCINT8)|(1<<PCINT9)
     sts PCMSK1, temp
 
-
-	/*
 ; --------------Configuración de los Pines para el puerto D-----
-	LDi Temp, 0xFF				;0b11111111, se activaron todos, debido a que se usará el utlimo para la alarma.
+	LDi Temp, 0x7F				;0b01111111, se activaron  casi todos menos el puntito. 
 	OUT DDRD, Temp				; Se les asigna a la dirección
+	; Setear a cero para empezar
 	CLR Temp					; limpio mi variable (setear a cero)
 	OUT PORTD,Temp				; Les mando 0 voltios para empezar. 
-	*/
 	
 ;--------------------------------
 ; Inicializar contador
@@ -104,15 +110,35 @@ SETUP:
     clr ContadorLED
     out PORTB, ContadorLED
 
-    SEI
+	clr TimerCount
+	out PORTD, TimerCount; verificar si da el reflejo al iniciar el programa.
+
+    SEI; Vuelvo a activar las interrupciones
 
 
 /****************************************/
 // Loop Infinito
 MAIN_LOOP:
+	; Aqui puedo poner la parte de la multiplexación. La logica. Pues es el Timero el que dirá lo demás.
+
     RJMP    MAIN_LOOP
 /*********************************************+*/
 // NON-Interrupt subroutines
+
+
+;=========================
+; Timer0: Para el conteo.
+;=========================
+
+    ldi Temp, (1<<CS02)|(1<<CS00)   ; Prescaler 1024 aproximadamente. 
+	; Esta parte solo es para probar la lógica.
+    out TCCR0B, Temp
+
+    ldi Temp, (1<<TOIE0)            ; Habilitar overflow
+    sts TIMSK0, Temp
+
+    clr TimerCount
+
 
 
 ;=========================
@@ -196,10 +222,12 @@ ISR_PCINT1:
 ;=========================
 ; ISR_PCINT2- Del LAB
 ;========================
+/*
 ISR_PCINT2:
 	
 
 	reti
-
+	*/
+	
 
 /****************************************/
