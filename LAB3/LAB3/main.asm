@@ -39,10 +39,9 @@
 .org PCI1addr;Pueba, luego cambiar a un nombre más significativo;
 	rjmp ISR_PCINT1; mi ubicación al saltar en la etiqueta. 
 
-
-; Parte del Laboratorio: 
-.org PCI2addr; En este caso se hace en el puerto D
-	rjmp ISR_PCINT2; Va a mi dirección.
+; Parte del Laboratorio:
+.org 0x001A      ; Dirección TIMER0_OVF según el datasheet
+	rjmp ISR_TIMER0
 
  /****************************************/
 
@@ -125,7 +124,6 @@ MAIN_LOOP:
 /*********************************************+*/
 // NON-Interrupt subroutines
 
-
 ;=========================
 ; Timer0: Para el conteo.
 ;=========================
@@ -140,10 +138,34 @@ MAIN_LOOP:
     clr TimerCount
 
 
+;========================
+ ; CONVERTIR_BCD
+;========================
+
+CONVERTIR_BCD:
+
+    mov Temp, ContadorLED
+    clr BCD_Decena
+    clr BCD_Unidad
+
+    cpi Temp, 10
+    brlo SOLO_UNIDAD
+
+    ldi BCD_Decena, 1
+    subi Temp, 10
+
+SOLO_UNIDAD:
+    mov BCD_Unidad, Temp
+    ret
+
+;=========================
+;==========================
+
+
 
 ;=========================
 ;   ANTIRREBOTE_INC
-;===================
+;=========================
 ANTIRREBOTE_INC:
     rcall DELAY_REBOTE      ; Esperar a que pase el rebote
 
@@ -152,9 +174,10 @@ ANTIRREBOTE_INC:
     rcall INCREMENTAR
 
     ret
-;=========================
+;=============================
 ;   ANTIRREBOTE_DEC
-;=======================
+;=============================
+
 ANTIRREBOTE_DEC:
     rcall DELAY_REBOTE
 
@@ -163,8 +186,6 @@ ANTIRREBOTE_DEC:
     rcall DECREMENTAR
 
     ret
-
-
 
 ;========================
 ; INCREMENTAR
@@ -219,15 +240,32 @@ ISR_PCINT1:
 
     reti
 
-;=========================
-; ISR_PCINT2- Del LAB
-;========================
-/*
-ISR_PCINT2:
-	
+;==========================================
+; ISR_TIMER0- Del LAB
+;===========================================
+ISR_TIMER0:
 
+    inc TimerCount;  Incremento mi contador
+	;---16,000,000 / 1024 = 15625 Hz
+	;15625 / 256 ? 61
+
+    cpi TimerCount, 61; Compare with Immediate. En caso sean iguales. digase 1, entonces salta a la siguiente etiqueta.
+    brne TIMER_EXIT
+
+    clr TimerCount; Limpio el contador.
+
+    ; Incrementar contador principal
+    inc ContadorLED
+    cpi ContadorLED, 16; Cuando sea 16 => da a 1. Salta a la siguente. 
+
+    brlo CONTINUE_TIMER
+    clr ContadorLED; Limpio mi contador.
+
+CONTINUE_TIMER:
+    rcall CONVERTIR_BCD; 
+
+TIMER_EXIT:
 	reti
-	*/
 	
 
 /****************************************/
