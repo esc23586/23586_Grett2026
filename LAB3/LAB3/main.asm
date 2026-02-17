@@ -3,7 +3,12 @@
 *
 * Creado: 17 de feb 
 * Autor : Grettel Escobedo 23586
-* Descripción: Implemente un contador binario de 4 bits, con lógica on-change y pullups internos
+* Descripción: Implemente un contador binario de 4 bits, con lógica on-change y pullups internos.
+
+*Parte del laboratorio: Implementar un contador en hexa de 4 bits utilizando una interrupción del TMR0. 
+*La interrupción del TMR0 deberá ser entre 5 y 20ms, pero el contador deberá cambiar cada 1000ms. 
+*Muestre el contador con el TMR0 en un display de 7 segmentos, de manera que se muestre el conteo en segundos.
+*Se espera que la vuelta del overflow sea, igual a 50. De esta manera se dara una cada segundo. 
 */
 /****************************************/
 // Encabezado (Definición de Registros, Variables y Constantes)
@@ -23,8 +28,13 @@
 .org 0x0000; Se incia aqui para guardar.
 	rjmp SETUP
 
-.org PCI1addr;Pueba, luego cambiar a un nombre más significativo; revisar si no sobreescribo
+.org PCI1addr;Pueba, luego cambiar a un nombre más significativo;
 	rjmp ISR_PCINT1; mi ubicación al saltar en la etiqueta. 
+
+
+; Parte del Laboratorio: 
+.org PCI2addr; En este caso se hace en el puerto D
+	rjmp ISR_PCINT2; Va a mi dirección.
 
  /****************************************/
 
@@ -167,7 +177,7 @@ DLY2:
 
 // Interrupt routines:
 ;========================
-; ISR
+; ISR Del prelab
 ;========================
 ISR_PCINT1:
 
@@ -182,6 +192,14 @@ ISR_PCINT1:
     rcall ANTIRREBOTE_DEC
 
     reti
+
+;=========================
+; ISR_PCINT2- Del LAB
+;========================
+ISR_PCINT2:
+	
+
+	reti
 
 
 /****************************************/
