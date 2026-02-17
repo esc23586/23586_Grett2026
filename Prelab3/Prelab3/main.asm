@@ -17,13 +17,24 @@
 ; Registros
 ;========================
 	.def ContadorLED   = r16
-	.def Contador7seg  = r20
+	;.def Contador7seg  = r20
 	.def Temp          = r17
 	.def D1            = r18
 	.def D2            = r19
 
-	.org 0x0000
+	.org 0x0000; Se incia aqui para guardar.
 	rjmp SETUP
+
+	.org PCINT1addr;Pueba, luego cambiar a un nombre más significativo; revisar si no sobreescribo
+    rjmp PCINT_ISR; mi ubicación al saltar en la etiqueta. 
+
+ /****************************************/
+ ;================
+ ;  -----RESET----
+ ;================
+
+ RESET:
+	CLI
 
  /****************************************/
 // Configuración de la pila
@@ -48,7 +59,7 @@ SETUP:
 
 ;CONTADOR (PreLAB):
 ; Se establece como salidas puerto B salidas (LEDs)
-    ldi Temp, 0b00001111
+    ldi Temp, 0b00001111; 0x0F
     out DDRB, Temp
 
 ; Apagar LEDs AL iniciar con el código 
@@ -65,11 +76,31 @@ SETUP:
     sbi PORTC, PC0				; le asigno 1, para que se active
     sbi PORTC, PC1
 
+;--------------------------------
+; Habilitar Pin Change Interrupt
+;--------------------------------
+    ldi temp, (1<<PCIE1)
+    sts PCICR, temp
+
+    ldi temp, (1<<PCINT8)|(1<<PCINT9)
+    sts PCMSK1, temp
+
+
+	/*
 ; --------------Configuración de los Pines para el puerto D-----
 	LDi Temp, 0xFF				;0b11111111, se activaron todos, debido a que se usará el utlimo para la alarma.
 	OUT DDRD, Temp				; Se les asigna a la dirección
 	CLR Temp					; limpio mi variable (setear a cero)
 	OUT PORTD,Temp				; Les mando 0 voltios para empezar. 
+	*/
+	
+;--------------------------------
+; Inicializar contador
+;--------------------------------
+    clr ContadorLED
+    out PORTB, ContadorLED
+
+    SEI
 
 
 /****************************************/
