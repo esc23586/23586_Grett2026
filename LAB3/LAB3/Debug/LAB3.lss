@@ -1,10 +1,10 @@
 
-AVRASM ver. 2.2.8  C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB3\LAB3\main.asm Tue Feb 17 14:43:26 2026
+AVRASM ver. 2.2.8  C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB3\LAB3\main.asm Tue Feb 17 16:15:41 2026
 
 [builtin](2): Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\avrasm\inc\m328Pdef.inc'
-C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB3\LAB3\main.asm(10): Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\avrasm\inc\M328PDEF.inc'
+C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB3\LAB3\main.asm(18): Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\avrasm\inc\M328PDEF.inc'
 [builtin](2): Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\avrasm\inc\m328Pdef.inc'
-C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB3\LAB3\main.asm(10): Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\avrasm\inc\M328PDEF.inc'
+C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB3\LAB3\main.asm(18): Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\avrasm\inc\M328PDEF.inc'
                                  
                                  /*
                                  
@@ -991,7 +991,15 @@ C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB3
                                  *
                                  * Creado: 17 de feb 
                                  * Autor : Grettel Escobedo 23586
-                                 * Descripción: Implemente un contador binario de 4 bits, con lógica on-change y pullups internos
+                                 * Descripción: Implemente un contador binario de 4 bits, con lógica on-change y pullups internos.
+                                 
+                                 *Parte del laboratorio: Implementar un contador en hexa de 4 bits utilizando una interrupción del TMR0. 
+                                 *La interrupción del TMR0 deberá ser entre 5 y 20ms, pero el contador deberá cambiar cada 1000ms. 
+                                 *Muestre el contador con el TMR0 en un display de 7 segmentos, de manera que se muestre el conteo en segundos.
+                                 *Se espera que la vuelta del overflow sea. De esta manera se dara una cada segundo.
+                                 
+                                 ; Según la logica del prescaler que utilizo, en teoria da 61 overflows de hecho
+                                  
                                  */
                                  /****************************************/
                                  // Encabezado (Definición de Registros, Variables y Constantes)
@@ -1046,174 +1054,271 @@ C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB3
                                  ; Registros
                                  ;========================
                                  	.def ContadorLED   = r16
-                                 	;.def Contador7seg  = r20
                                  	.def Temp          = r17
                                  	.def D1            = r18
                                  	.def D2            = r19
+                                 	;Parte del  Lab y Post:
+                                 
+                                 	.def TimerCount = r20
+                                 	.def BCD_Unidad = r21
+                                 	.def BCD_Decena = r22
+                                 
                                  
                                  .org 0x0000; Se incia aqui para guardar.
-000000 c008                      	rjmp SETUP
+000000 c01a                      	rjmp SETUP
                                  
-                                 .org PCI1addr;Pueba, luego cambiar a un nombre más significativo; revisar si no sobreescribo
-000008 c030                      	rjmp ISR_PCINT1; mi ubicación al saltar en la etiqueta. 
+                                 .org PCI1addr;Pueba, luego cambiar a un nombre más significativo;
+000008 c063                      	rjmp ISR_PCINT1; mi ubicación al saltar en la etiqueta. 
+                                 
+                                 ; Parte del Laboratorio:
+                                 .org 0x001A      ; Dirección TIMER0_OVF según el datasheet
+00001a c057                      	rjmp ISR_TIMER0
                                  
                                   /****************************************/
                                  
                                   /****************************************/
                                  // Configuración de la pila
                                  SETUP:
-000009 94f8                      	cli
+00001b 94f8                      	cli; Desactivo las interrupciones.
                                  
-00000a ef0f                      	LDI     R16, LOW(RAMEND)
-00000b bf0d                      	OUT     SPL, R16
-00000c e008                      	LDI     R16, HIGH(RAMEND)
-00000d bf0e                      	OUT     SPH, R16
+00001c ef0f                      	LDI     R16, LOW(RAMEND)
+00001d bf0d                      	OUT     SPL, R16
+00001e e008                      	LDI     R16, HIGH(RAMEND)
+00001f bf0e                      	OUT     SPH, R16
                                  
                                  
                                  ;========================================================
                                  ; Tablita para los valores del display
                                  ;========================================================
-                                 ; revisar si no me afecta el que no utilizaré letras
-                                 /*
+                                 ; revisar si rompe el códgio. ojalá no.
+                                 
                                  	Table7seg:	
-                                 		.DB	0x3F, 0x06, 0x5B, 0x4F, 0x66, 0x6D, 0x7D, 0x07, 0x7F, 0x67, 0x77, 0x7C, 0x39, 0x5E, 0x79, 0x71
-                                 		*/
+000020 063f
+000021 4f5b
+000022 6d66
+000023 077d
+000024 677f
+000025 7c77
+000026 5e39
+000027 7179                      		.DB	0x3F, 0x06, 0x5B, 0x4F, 0x66, 0x6D, 0x7D, 0x07, 0x7F, 0x67, 0x77, 0x7C, 0x39, 0x5E, 0x79, 0x71
+                                 		
                                  
                                  /****************************************/
                                  //  ---Puertos- MCU--- Salidas y Entradas.
                                  
                                  ;CONTADOR (PreLAB):
                                  ; Se establece como salidas puerto B salidas (LEDs)
-00000e e01f                          ldi Temp, 0b00001111; 0x0F
-00000f b914                          out DDRB, Temp
+000028 e01f                          ldi Temp, 0b00001111; 0x0F
+000029 b914                          out DDRB, Temp
                                  
                                  ; Apagar LEDs AL iniciar con el código 
-000010 2711                          clr Temp
-000011 b915                          out PORTB, Temp
+00002a 2711                          clr Temp
+00002b b915                          out PORTB, Temp
                                  
                                  
                                  ; ---------PC0 y PC1 entradas con pull-up-----
                                  ; Lo hago de esta forma porque es más rapido, además me trajo complicaciones con la asignación de binario.
                                  
-000012 9838                          cbi DDRC, PC0				; clear bit, voy a la dirección y le digo que es 0
-000013 9839                          cbi DDRC, PC1
-                                 	; se activan los pullup
-000014 9a40                          sbi PORTC, PC0				; le asigno 1, para que se active
-000015 9a41                          sbi PORTC, PC1
+00002c 9838                          cbi DDRC, PC0				; clear bit, voy a la dirección y le digo que es 0
+00002d 9839                          cbi DDRC, PC1
+                                 	; Se activan los pullup
+00002e 9a40                          sbi PORTC, PC0				; le asigno 1, para que se active
+00002f 9a41                          sbi PORTC, PC1
                                  
                                  ;--------------------------------
                                  ; Habilitar Pin Change Interrupt
                                  ;--------------------------------
-000016 e012                          ldi temp, (1<<PCIE1)
-000017 9310 0068                     sts PCICR, temp
+000030 e012                          ldi temp, (1<<PCIE1)
+000031 9310 0068                     sts PCICR, temp
                                  
-000019 e013                          ldi temp, (1<<PCINT8)|(1<<PCINT9)
-00001a 9310 006c                     sts PCMSK1, temp
+000033 e013                          ldi temp, (1<<PCINT8)|(1<<PCINT9)
+000034 9310 006c                     sts PCMSK1, temp
                                  
-                                 
-                                 	/*
                                  ; --------------Configuración de los Pines para el puerto D-----
-                                 	LDi Temp, 0xFF				;0b11111111, se activaron todos, debido a que se usará el utlimo para la alarma.
-                                 	OUT DDRD, Temp				; Se les asigna a la dirección
-                                 	CLR Temp					; limpio mi variable (setear a cero)
-                                 	OUT PORTD,Temp				; Les mando 0 voltios para empezar. 
-                                 	*/
-                                 	
+000036 e71f                      	LDi Temp, 0x7F				;0b01111111, se activaron  casi todos menos el puntito. 
+000037 b91a                      	OUT DDRD, Temp				; Se les asigna a la dirección
+                                 	; Setear a cero para empezar
+000038 2711                      	CLR Temp					; limpio mi variable (setear a cero)
+000039 b91b                      	OUT PORTD,Temp				; Les mando 0 voltios para empezar. 
+                                 
+                                 ;-------------------------
+                                 ; Timer0: Para el conteo.
+                                 ;-----------------------
+                                 
+00003a e015                          ldi Temp, (1<<CS02)|(1<<CS00)   ; Prescaler 1024 aproximadamente. 
+                                 	; Esta parte solo es para probar la lógica.
+00003b bd15                          out TCCR0B, Temp
+                                 
+00003c e011                          ldi Temp, (1<<TOIE0)            ; Habilitar overflow
+00003d 9310 006e                     sts TIMSK0, Temp
+                                 
+00003f 2744                          clr TimerCount
+                                 
+                                 
                                  ;--------------------------------
                                  ; Inicializar contador
                                  ;--------------------------------
-00001c 2700                          clr ContadorLED
-00001d b905                          out PORTB, ContadorLED
+000040 2700                          clr ContadorLED
+000041 b905                          out PORTB, ContadorLED
                                  
-00001e 9478                          SEI
+                                 	/*clr TimerCount
+                                 	out PORTD, TimerCount; verificar si da el reflejo al iniciar el programa.
                                  
                                  
-                                 /****************************************/
+                                 	clr BCD_Unidad
+                                 	clr BCD_Decena
+                                 */
+000042 9478                          SEI; Vuelvo a activar las interrupciones
+                                 
+                                 
+                                 /**************************************************/
                                  // Loop Infinito
                                  MAIN_LOOP:
-00001f cfff                          RJMP    MAIN_LOOP
-                                 /*********************************************+*/
+                                 	; Aqui puedo poner la parte de la multiplexación. La logica. Pues es el Timero el que dirá lo demás.
+                                 
+                                 	; Mostrar unidades
+000043 2f15                          mov Temp, BCD_Unidad
+000044 b91b                          out PORTD, Temp
+                                 							; activar display unidades
+                                 							; (ejemplo: sbi PORTB, 4)
+000045 d01f                          rcall DELAY_REBOTE		; Mi delay
+                                 
+                                     ; Mostrar decenas
+000046 2f16                          mov Temp, BCD_Decena
+000047 b91b                          out PORTD, Temp
+                                 							; activar display decenas
+                                 							; (ejemplo: sbi PORTB, 5)
+000048 d01c                          rcall DELAY_REBOTE		; Mi delay
+                                 
+000049 cff9                          RJMP    MAIN_LOOP
+                                 /*********************************************************/
                                  // NON-Interrupt subroutines
                                  
+                                 ;--------------------------
+                                  ; CONVERTIR_BCD
+                                 ;---------------------------
+                                 ; Se busca	que en el momento en el que llega a 10 comprueba y en ese momento las unidades tiene que pasar a cero
+                                 CONVERTIR_BCD:
                                  
-                                 ;=========================
+00004a 2f10                          mov Temp, ContadorLED; 
+00004b 2766                          clr BCD_Decena		; Se limpia mis mini contadores.
+00004c 2755                          clr BCD_Unidad		; Limpieza mi ni contadores.
+                                 
+00004d 301a                          cpi Temp, 10		; Compara si llego a 10
+00004e f010                          brlo SOLO_UNIDAD	;	Entonces al comparar si es menor salta a la etiqueta. EN el momento que sea mayor Continua
+                                 
+00004f e061                          ldi BCD_Decena, 1	; Se carga 1 a la parte de las decentas, que hasta ahroa era cer.
+000050 501a                          subi Temp, 10		; Se hace la Subtract Immediate
+                                 
+                                 SOLO_UNIDAD:
+000051 2f51                          mov BCD_Unidad, Temp ;
+                                 
+000052 9508                          ret
+                                 
+                                 ;--------------------------
                                  ;   ANTIRREBOTE_INC
-                                 ;===================
+                                 ;-----------------------------
                                  ANTIRREBOTE_INC:
-000020 d011                          rcall DELAY_REBOTE      ; Esperar a que pase el rebote
+000053 d011                          rcall DELAY_REBOTE      ; Esperar a que pase el rebote
                                  
-000021 b116                          in temp, PINC           ; Leer otra vez el pin
-000022 ff10                          sbrs temp, 0            ; Si sigue en 0 ? botón realmente presionado
-000023 d006                          rcall INCREMENTAR
+000054 b116                          in temp, PINC           ; Leer otra vez el pin
+000055 ff10                          sbrs temp, 0            ; Si sigue en 0 ? botón realmente presionado
+000056 d006                          rcall INCREMENTAR
                                  
-000024 9508                          ret
-                                 ;=========================
+000057 9508                          ret
+                                 ;------------------------------
                                  ;   ANTIRREBOTE_DEC
-                                 ;=======================
+                                 ;------------------------------
+                                 
                                  ANTIRREBOTE_DEC:
-000025 d00c                          rcall DELAY_REBOTE
+000058 d00c                          rcall DELAY_REBOTE
                                  
-000026 b116                          in temp, PINC
-000027 ff11                          sbrs temp, 1
-000028 d005                          rcall DECREMENTAR
+000059 b116                          in temp, PINC
+00005a ff11                          sbrs temp, 1
+00005b d005                          rcall DECREMENTAR
                                  
-000029 9508                          ret
-                                 
-                                 
+00005c 9508                          ret
                                  
                                  ;========================
                                  ; INCREMENTAR
                                  ;========================
                                  INCREMENTAR:
-00002a 9503                          inc ContadorLED
-00002b 700f                          andi ContadorLED, 0x0F   ; Limitar a 4 bits
-00002c b905                          out PORTB, ContadorLED
-00002d 9508                          ret
+00005d 9503                          inc ContadorLED
+00005e 700f                          andi ContadorLED, 0x0F   ; Limitar a 4 bits
+00005f b905                          out PORTB, ContadorLED
+000060 9508                          ret
                                  
                                  ;========================
                                  ; DECREMENTAR
                                  ;========================
                                  DECREMENTAR:
-00002e 950a                          dec ContadorLED
-00002f 700f                          andi ContadorLED, 0x0F
-000030 b905                          out PORTB, ContadorLED
-000031 9508                          ret
+000061 950a                          dec ContadorLED
+000062 700f                          andi ContadorLED, 0x0F
+000063 b905                          out PORTB, ContadorLED
+000064 9508                          ret
                                  
                                  ;==============================
                                  ; SUBRUTINA ANTIRREBOTE:
                                  ;==============================
                                  DELAY_REBOTE:
-000032 e624                          ldi D1, 100
+000065 e624                          ldi D1, 100
                                  DLY1:
-000033 e634                          ldi D2, 100
+000066 e634                          ldi D2, 100
                                  DLY2:
-000034 953a                          dec D2
-000035 f7f1                          brne DLY2
-000036 952a                          dec D1
-000037 f7d9                          brne DLY1
-000038 9508                          ret
+000067 953a                          dec D2
+000068 f7f1                          brne DLY2
+000069 952a                          dec D1
+00006a f7d9                          brne DLY1
+00006b 9508                          ret
                                  
                                  
                                  /******************************************************/
                                  
                                  // Interrupt routines:
                                  ;========================
-                                 ; ISR
+                                 ; ISR Del prelab
                                  ;========================
                                  ISR_PCINT1:
                                  
-000039 b116                          in temp, PINC
+00006c b116                          in temp, PINC
                                  
                                  ;----- Botón PC0 (Incrementar) -----
-00003a ff10                          sbrs temp, 0      ; Si bit 0 = 1 lo salta
-00003b dfe4                          rcall ANTIRREBOTE_INC
+00006d ff10                          sbrs temp, 0      ; Si bit 0 = 1 lo salta
+00006e dfe4                          rcall ANTIRREBOTE_INC
                                  
                                  ;----- Botón PC1 (Decrementar) -----
-00003c ff11                          sbrs temp, 1
-00003d dfe7                          rcall ANTIRREBOTE_DEC
+00006f ff11                          sbrs temp, 1
+000070 dfe7                          rcall ANTIRREBOTE_DEC
                                  
-00003e 9518                          reti
+000071 9518                          reti
                                  
+                                 ;==========================================
+                                 ; ISR_TIMER0- Del LAB
+                                 ;===========================================
+                                 ISR_TIMER0:
+                                 
+000072 9543                          inc TimerCount;  Incremento mi contador
+                                 	;---16,000,000 / 1024 = 15625 Hz
+                                 	;15625 / 256 ? 61
+                                 
+000073 334d                          cpi TimerCount, 61; Compare with Immediate. En caso sean iguales. digase 1, entonces salta a la siguiente etiqueta.
+000074 f431                          brne TIMER_EXIT
+                                 
+000075 2744                          clr TimerCount; Limpio el contador.
+                                 
+                                     ; Incrementar contador principal
+000076 9503                          inc ContadorLED
+000077 3100                          cpi ContadorLED, 16; Cuando sea 16 => da a 1. Salta a la siguente. 
+                                 
+000078 f008                          brlo CONTINUE_TIMER
+000079 2700                          clr ContadorLED; Limpio mi contador.
+                                 
+                                 CONTINUE_TIMER:
+00007a dfcf                          rcall CONVERTIR_BCD; 
+                                 
+                                 TIMER_EXIT:
+00007b 9518                      	reti
+                                 	
                                  
 
 
@@ -1234,37 +1339,37 @@ counted separately from r26..r31 here.
 "ATmega328P" register use summary:
 x  :   0 y  :   0 z  :   0 r0 :   0 r1 :   0 r2 :   0 r3 :   0 r4 :   0 
 r5 :   0 r6 :   0 r7 :   0 r8 :   0 r9 :   0 r10:   0 r11:   0 r12:   0 
-r13:   0 r14:   0 r15:   0 r16:  12 r17:  15 r18:   2 r19:   2 r20:   0 
-r21:   0 r22:   0 r23:   0 r24:   0 r25:   0 r26:   0 r27:   0 r28:   0 
+r13:   0 r14:   0 r15:   0 r16:  16 r17:  31 r18:   2 r19:   2 r20:   4 
+r21:   3 r22:   3 r23:   0 r24:   0 r25:   0 r26:   0 r27:   0 r28:   0 
 r29:   0 r30:   0 r31:   0 
-Registers used: 4 out of 35 (11.4%)
+Registers used: 7 out of 35 (20.0%)
 
 "ATmega328P" instruction use summary:
 .lds  :   0 .sts  :   0 adc   :   0 add   :   0 adiw  :   0 and   :   0 
 andi  :   2 asr   :   0 bclr  :   0 bld   :   0 brbc  :   0 brbs  :   0 
 brcc  :   0 brcs  :   0 break :   0 breq  :   0 brge  :   0 brhc  :   0 
-brhs  :   0 brid  :   0 brie  :   0 brlo  :   0 brlt  :   0 brmi  :   0 
-brne  :   2 brpl  :   0 brsh  :   0 brtc  :   0 brts  :   0 brvc  :   0 
+brhs  :   0 brid  :   0 brie  :   0 brlo  :   2 brlt  :   0 brmi  :   0 
+brne  :   3 brpl  :   0 brsh  :   0 brtc  :   0 brts  :   0 brvc  :   0 
 brvs  :   0 bset  :   0 bst   :   0 call  :   0 cbi   :   2 cbr   :   0 
-clc   :   0 clh   :   0 cli   :   1 cln   :   0 clr   :   2 cls   :   0 
+clc   :   0 clh   :   0 cli   :   1 cln   :   0 clr   :   8 cls   :   0 
 clt   :   0 clv   :   0 clz   :   0 com   :   0 cp    :   0 cpc   :   0 
-cpi   :   0 cpse  :   0 dec   :   3 eor   :   0 fmul  :   0 fmuls :   0 
-fmulsu:   0 icall :   0 ijmp  :   0 in    :   3 inc   :   1 jmp   :   0 
-ld    :   0 ldd   :   0 ldi   :   7 lds   :   0 lpm   :   0 lsl   :   0 
-lsr   :   0 mov   :   0 movw  :   0 mul   :   0 muls  :   0 mulsu :   0 
-neg   :   0 nop   :   0 or    :   0 ori   :   0 out   :   7 pop   :   0 
-push  :   0 rcall :   6 ret   :   5 reti  :   1 rjmp  :   3 rol   :   0 
+cpi   :   3 cpse  :   0 dec   :   3 eor   :   0 fmul  :   0 fmuls :   0 
+fmulsu:   0 icall :   0 ijmp  :   0 in    :   3 inc   :   3 jmp   :   0 
+ld    :   0 ldd   :   0 ldi   :  11 lds   :   0 lpm   :   0 lsl   :   0 
+lsr   :   0 mov   :   4 movw  :   0 mul   :   0 muls  :   0 mulsu :   0 
+neg   :   0 nop   :   0 or    :   0 ori   :   0 out   :  12 pop   :   0 
+push  :   0 rcall :   9 ret   :   6 reti  :   2 rjmp  :   4 rol   :   0 
 ror   :   0 sbc   :   0 sbci  :   0 sbi   :   2 sbic  :   0 sbis  :   0 
 sbiw  :   0 sbr   :   0 sbrc  :   0 sbrs  :   4 sec   :   0 seh   :   0 
 sei   :   1 sen   :   0 ser   :   0 ses   :   0 set   :   0 sev   :   0 
-sez   :   0 sleep :   0 spm   :   0 st    :   0 std   :   0 sts   :   2 
-sub   :   0 subi  :   0 swap  :   0 tst   :   0 wdr   :   0 
-Instructions used: 18 out of 113 (15.9%)
+sez   :   0 sleep :   0 spm   :   0 st    :   0 std   :   0 sts   :   3 
+sub   :   0 subi  :   1 swap  :   0 tst   :   0 wdr   :   0 
+Instructions used: 22 out of 113 (19.5%)
 
 "ATmega328P" memory use summary [bytes]:
 Segment   Begin    End      Code   Data   Used    Size   Use%
 ---------------------------------------------------------------
-[.cseg] 0x000000 0x00007e    112      0    112   32768   0.3%
+[.cseg] 0x000000 0x0000f8    184     16    200   32768   0.6%
 [.dseg] 0x000100 0x000100      0      0      0    2048   0.0%
 [.eseg] 0x000000 0x000000      0      0      0    1024   0.0%
 

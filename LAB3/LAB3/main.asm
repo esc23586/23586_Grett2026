@@ -11,17 +11,47 @@
 *Se espera que la vuelta del overflow sea. De esta manera se dara una cada segundo.
 
 ; Según la logica del prescaler que utilizo, en teoria da 61 overflows de hecho
- 
+; Utilicé lógica de 2 punteros, pq me odio mucho
 */
 /****************************************/
 // Encabezado (Definición de Registros, Variables y Constantes)
 .include "M328PDEF.inc"     // Include definitions specific to ATMega328P
 //variable_name:     .byte   1   // Memory alocation for variable_name:     .byte   (byte size)
+.dseg
+DISPRAM:
+	.BYTE 16; de esta manera reservo los 16
 .cseg
+.org 0x0000; Se incia aqui para guardar.
 
+	rjmp SETUP
+
+.org PCI1addr;Pueba, luego cambiar a un nombre más significativo;
+	rjmp ISR_PCINT1; mi ubicación al saltar en la etiqueta. 
+
+; Parte del Laboratorio:
+/*
+.org 0x001A      ; Dirección TIMER0_OVF según el datasheet
+	rjmp ISR_TIMER0
+*/
+
+;Guardamos un salto a la sub-rutina "RESET_TOGGLE"
+.org  OVF0addr
+	RJMP RESET_TOGGLE
+
+.org 0x0022
+ /****************************************/
+ ;========================================================
+; Tablita para los valores del display
+;========================================================
+; revisar si rompe el códgio. ojalá no.
+
+	Table7seg:	
+		.DB	0x3F, 0x06, 0x5B, 0x4F, 0x66, 0x6D, 0x7D, 0x07, 0x7F, 0x67, 0x77, 0x7C, 0x39, 0x5E, 0x79, 0x71
+		
 ;========================
 ; Registros
 ;========================
+/*
 	.def ContadorLED   = r16
 	.def Temp          = r17
 	.def D1            = r18
@@ -31,39 +61,82 @@
 	.def TimerCount = r20
 	.def BCD_Unidad = r21
 	.def BCD_Decena = r22
-
-
-.org 0x0000; Se incia aqui para guardar.
-	rjmp SETUP
-
-.org PCI1addr;Pueba, luego cambiar a un nombre más significativo;
-	rjmp ISR_PCINT1; mi ubicación al saltar en la etiqueta. 
-
-; Parte del Laboratorio:
-.org 0x001A      ; Dirección TIMER0_OVF según el datasheet
-	rjmp ISR_TIMER0
-
- /****************************************/
+	*/
+	.def	MILLIS		= R19
+	.def	COUNTDECS	= R18
+	.def	COUNTSECS	= R20
+	.def	SECStemp	= R21
+	.def	DECStemp	= R25
+	.def	COUNT		= R22
+	.def	PUSHBOTTON_A	= R23
+	.def	PUSHBOTTON_B	= R24
 
  /****************************************/
 // Configuración de la pila
 SETUP:
 	cli; Desactivo las interrupciones.
 
-	LDI     R16, LOW(RAMEND)
-	OUT     SPL, R16
-	LDI     R16, HIGH(RAMEND)
-	OUT     SPH, R16
+	;PUNTERO Z (Unidades de segundo); quiero que vaya apuntando a mis valores
+	LDI	ZL, LOW(TABLA << 1)
+	LDI	ZH, HIGH(TABLA << 1)
+
+	;Puntero x (Decenas de segundo)
+	LDI	XL, LOW(DISPRAM << 1)
+	LDI	XH, HIGH(DISPRAM << 1)
 
 
-;========================================================
-; Tablita para los valores del display
-;========================================================
-; revisar si rompe el códgio. ojalá no.
 
-	Table7seg:	
-		.DB	0x3F, 0x06, 0x5B, 0x4F, 0x66, 0x6D, 0x7D, 0x07, 0x7F, 0x67, 0x77, 0x7C, 0x39, 0x5E, 0x79, 0x71
-		
+	;Almacenamos datos manualmente en RAM
+	LDI	R16, 0x3F
+	ST	X+, R16
+
+	LDI	R16, 0x06
+	ST	X+, R16
+
+	LDI	R16, 0x5B
+	ST	X+, R16
+
+	LDI	R16, 0x4F
+	ST	X+, R16
+
+	LDI	R16, 0x66
+	ST	X+, R16
+
+	LDI	R16, 0x6D
+	ST	X+, R16
+
+	LDI	R16, 0x7D
+	ST	X+, R16
+
+	LDI	R16, 0x07
+	ST	X+, R16
+
+	LDI	R16, 0x7F
+	ST	X+, R16
+
+	LDI	R16, 0x67
+	ST	X+, R16
+
+	LDI	R16, 0x77
+	ST	X+, R16
+
+	LDI	R16, 0x7C
+	ST	X+, R16
+
+	LDI	R16, 0x39
+	ST	X+, R16
+
+	LDI	R16, 0x5E
+	ST	X+, R16
+
+	LDI	R16, 0x79
+	ST	X+, R16
+
+	LDI	R16, 0x71
+	ST	X+, R16
+
+
+
 
 /****************************************/
 //  ---Puertos- MCU--- Salidas y Entradas.
@@ -102,35 +175,19 @@ SETUP:
 	; Setear a cero para empezar
 	CLR Temp					; limpio mi variable (setear a cero)
 	OUT PORTD,Temp				; Les mando 0 voltios para empezar. 
-	
-;--------------------------------
-; Inicializar contador
-;--------------------------------
-    clr ContadorLED
-    out PORTB, ContadorLED
 
-	clr TimerCount
-	out PORTD, TimerCount; verificar si da el reflejo al iniciar el programa.
-
-    SEI; Vuelvo a activar las interrupciones
-
-
-/****************************************/
-// Loop Infinito
-MAIN_LOOP:
-	; Aqui puedo poner la parte de la multiplexación. La logica. Pues es el Timero el que dirá lo demás.
-
-    RJMP    MAIN_LOOP
-/*********************************************+*/
-// NON-Interrupt subroutines
-
-;=========================
+;-------------------------
 ; Timer0: Para el conteo.
-;=========================
+;-----------------------
+	ldi Temp, 0
+    out TCCR0A, Temp        ; Modo normal
 
     ldi Temp, (1<<CS02)|(1<<CS00)   ; Prescaler 1024 aproximadamente. 
 	; Esta parte solo es para probar la lógica.
     out TCCR0B, Temp
+
+	ldi Temp, 100           ; Precarga para ~10ms
+    out TCNT0, Temp
 
     ldi Temp, (1<<TOIE0)            ; Habilitar overflow
     sts TIMSK0, Temp
@@ -138,34 +195,68 @@ MAIN_LOOP:
     clr TimerCount
 
 
-;========================
- ; CONVERTIR_BCD
-;========================
+;--------------------------------
+; Inicializar contador
+;--------------------------------
+    clr ContadorLED
+    out PORTB, ContadorLED
 
+	/*clr TimerCount
+	out PORTD, TimerCount; verificar si da el reflejo al iniciar el programa.
+
+	clr BCD_Unidad
+	clr BCD_Decena
+*/
+    SEI; Vuelvo a activar las interrupciones
+
+
+/**************************************************/
+// Loop Infinito
+MAIN_LOOP:
+	; Aqui puedo poner la parte de la multiplexación. La logica. Pues es el Timero el que dirá lo demás.
+
+	; Mostrar unidades
+    mov Temp, BCD_Unidad
+    out PORTD, Temp
+							; activar display unidades
+							; (ejemplo: sbi PORTB, 4)
+    rcall DELAY_REBOTE		; Mi delay
+
+    ; Mostrar decenas
+    mov Temp, BCD_Decena
+    out PORTD, Temp
+							; activar display decenas
+							; (ejemplo: sbi PORTB, 5)
+    rcall DELAY_REBOTE		; Mi delay
+
+    RJMP    MAIN_LOOP
+/*********************************************************/
+// NON-Interrupt subroutines
+
+;--------------------------
+ ; CONVERTIR_BCD
+;---------------------------
+; Se busca	que en el momento en el que llega a 10 comprueba y en ese momento las unidades tiene que pasar a cero
 CONVERTIR_BCD:
 
-    mov Temp, ContadorLED
-    clr BCD_Decena
-    clr BCD_Unidad
+    mov Temp, ContadorLED; 
+    clr BCD_Decena		; Se limpia mis mini contadores.
+    clr BCD_Unidad		; Limpieza mi ni contadores.
 
-    cpi Temp, 10
-    brlo SOLO_UNIDAD
+    cpi Temp, 10		; Compara si llego a 10
+    brlo SOLO_UNIDAD	;	Entonces al comparar si es menor salta a la etiqueta. EN el momento que sea mayor Continua
 
-    ldi BCD_Decena, 1
-    subi Temp, 10
+    ldi BCD_Decena, 1	; Se carga 1 a la parte de las decentas, que hasta ahroa era cer.
+    subi Temp, 10		; Se hace la Subtract Immediate
 
 SOLO_UNIDAD:
-    mov BCD_Unidad, Temp
+    mov BCD_Unidad, Temp ;
+
     ret
 
-;=========================
-;==========================
-
-
-
-;=========================
+;--------------------------
 ;   ANTIRREBOTE_INC
-;=========================
+;-----------------------------
 ANTIRREBOTE_INC:
     rcall DELAY_REBOTE      ; Esperar a que pase el rebote
 
@@ -174,9 +265,9 @@ ANTIRREBOTE_INC:
     rcall INCREMENTAR
 
     ret
-;=============================
+;------------------------------
 ;   ANTIRREBOTE_DEC
-;=============================
+;------------------------------
 
 ANTIRREBOTE_DEC:
     rcall DELAY_REBOTE
