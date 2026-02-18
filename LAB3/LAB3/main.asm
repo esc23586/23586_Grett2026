@@ -234,6 +234,7 @@ MAIN_LOOP:
 		CPI		COUNTDECS, 6; comparo si las decimas ya llegaron a 6
 		BREQ	Limpiar2; si la co mparación es cierta, se salta a la etiquea de limpiar 2 para limpia las decimas
 		ADIW	X, 1
+
 		RJMP	LOOP
 
 	;Si ya van 60 segundos en el conteo, reiniciamos el Display del contador de decenas de segundo (COUNTSECS)...
@@ -245,83 +246,6 @@ MAIN_LOOP:
     RJMP    MAIN_LOOP
 /*********************************************************/
 // NON-Interrupt subroutines
-
-;--------------------------
- ; CONVERTIR_BCD
-;---------------------------
-; Se busca	que en el momento en el que llega a 10 comprueba y en ese momento las unidades tiene que pasar a cero
-CONVERTIR_BCD:
-
-    mov Temp, ContadorLED; 
-    clr BCD_Decena		; Se limpia mis mini contadores.
-    clr BCD_Unidad		; Limpieza mi ni contadores.
-
-    cpi Temp, 10		; Compara si llego a 10
-    brlo SOLO_UNIDAD	;	Entonces al comparar si es menor salta a la etiqueta. EN el momento que sea mayor Continua
-
-    ldi BCD_Decena, 1	; Se carga 1 a la parte de las decentas, que hasta ahroa era cer.
-    subi Temp, 10		; Se hace la Subtract Immediate
-
-SOLO_UNIDAD:
-    mov BCD_Unidad, Temp ;
-
-    ret
-
-;--------------------------
-;   ANTIRREBOTE_INC
-;-----------------------------
-ANTIRREBOTE_INC:
-    rcall DELAY_REBOTE      ; Esperar a que pase el rebote
-
-    in temp, PINC           ; Leer otra vez el pin
-    sbrs temp, 0            ; Si sigue en 0 ? botón realmente presionado
-    rcall INCREMENTAR
-
-    ret
-;------------------------------
-;   ANTIRREBOTE_DEC
-;------------------------------
-
-ANTIRREBOTE_DEC:
-    rcall DELAY_REBOTE
-
-    in temp, PINC
-    sbrs temp, 1
-    rcall DECREMENTAR
-
-    ret
-
-;========================
-; INCREMENTAR
-;========================
-INCREMENTAR:
-    inc ContadorLED
-    andi ContadorLED, 0x0F   ; Limitar a 4 bits
-    out PORTB, ContadorLED
-    ret
-
-;========================
-; DECREMENTAR
-;========================
-DECREMENTAR:
-    dec ContadorLED
-    andi ContadorLED, 0x0F
-    out PORTB, ContadorLED
-    ret
-
-;==============================
-; SUBRUTINA ANTIRREBOTE:
-;==============================
-DELAY_REBOTE:
-    ldi D1, 100
-DLY1:
-    ldi D2, 100
-DLY2:
-    dec D2
-    brne DLY2
-    dec D1
-    brne DLY1
-    ret
 
 
 /******************************************************/
