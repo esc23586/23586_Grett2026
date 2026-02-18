@@ -207,54 +207,6 @@ SETUP:
 	STS		PCMSK1, R16
 	//-------------------------------------------------------------
 
-	SEI ; Ahora sí mis interrupciones para el código
-
-
-
-
-
-;--------------------------------
-; Habilitar Pin Change Interrupt
-;--------------------------------
-    ldi temp, (1<<PCIE1)
-    sts PCICR, temp
-
-    ldi temp, (1<<PCINT8)|(1<<PCINT9)
-    sts PCMSK1, temp
-
-
-
-;-------------------------
-; Timer0: Para el conteo.
-;-----------------------
-	ldi Temp, 0
-    out TCCR0A, Temp        ; Modo normal
-
-    ldi Temp, (1<<CS02)|(1<<CS00)   ; Prescaler 1024 aproximadamente. 
-	; Esta parte solo es para probar la lógica.
-    out TCCR0B, Temp
-
-	ldi Temp, 100           ; Precarga para ~10ms
-    out TCNT0, Temp
-
-    ldi Temp, (1<<TOIE0)            ; Habilitar overflow
-    sts TIMSK0, Temp
-
-    clr TimerCount
-
-
-;--------------------------------
-; Inicializar contador
-;--------------------------------
-    clr ContadorLED
-    out PORTB, ContadorLED
-
-	/*clr TimerCount
-	out PORTD, TimerCount; verificar si da el reflejo al iniciar el programa.
-
-	clr BCD_Unidad
-	clr BCD_Decena
-*/
     SEI; Vuelvo a activar las interrupciones
 
 
