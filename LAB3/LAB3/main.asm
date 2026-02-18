@@ -247,6 +247,33 @@ MAIN_LOOP:
 /*********************************************************/
 // NON-Interrupt subroutines
 
+COUNTUP_SEG:
+	BST		PUSHBOTTON_A, 0
+	BRTC	RETURN_UP
+	CALL	COUNTUP
+	LDI		PUSHBOTTON_A,	0b00000000
+	RJMP		RETURN_UP
+
+COUNTUP:
+	INC		COUNT
+	SBRS	COUNT, 4
+	CLR		COUNT
+	OUT		PORTB, COUNT
+	RET	
+
+COUNTDWN_SEG:
+	bst		PUSHBOTTON_B, 0
+	BRTC	RETURN_DWN
+	call	COUNTDWN
+	ldi		PUSHBOTTON_B,	0b00000000
+	rjmp	RETURN_DWN
+
+COUNTDWN:
+	DEC		COUNT
+	SBRS	COUNT, 7
+	ldi		COUNT, 0x0F
+	out		PORTB, COUNT
+	ret
 
 /******************************************************/
 
