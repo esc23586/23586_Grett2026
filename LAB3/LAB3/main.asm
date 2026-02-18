@@ -254,7 +254,7 @@ MAIN_LOOP:
 ;========================
 ; ISR Del prelab
 ;========================
-ISR_PCINT1:
+/*ISR_PCINT1:
 
     in temp, PINC
 
@@ -267,33 +267,54 @@ ISR_PCINT1:
     rcall ANTIRREBOTE_DEC
 
     reti
-
+	*/
 ;==========================================
-; ISR_TIMER0- Del LAB
+; Parte del Lab
 ;===========================================
-ISR_TIMER0:
+RESET_TOGGLE:		
+	;Rutina para reiniciar Timer0 luego de 10ms...
+	;y para "togglear" qu  display se muestra (Unidades de segundo o decenas de segundo)
+	;Reiniciamos TIMER0 e incrementamos COUNTMILLIS
 
-    inc TimerCount;  Incremento mi contador
-	;---16,000,000 / 1024 = 15625 Hz
-	;15625 / 256 ? 61
+	INC		MILLIS
+	LDI		R16, 100
+	OUT		TCNT0, R16
+	SBI		PINC, 2		;Toggleamos el bit del transistor de DISPUNIS
+	SBI		PINC, 3		;Toggleamos el bit del transistor de DISPDECS
+	;Si el bit del transistor DISPUNIS est  encendido up DISPUNIS en PORTD y si está apagado en PORTD
+	SBIS	PORTC, 2
+	RJMP	COUNTDECS_SET
+	LPM		SECStemp, Z
+	OUT		PORTD, SECStemp
 
-    cpi TimerCount, 61; Compare with Immediate. En caso sean iguales. digase 1, entonces salta a la siguiente etiqueta.
-    brne TIMER_EXIT
+	TIMER_RETURN:
+	RETI
 
-    clr TimerCount; Limpio el contador.
+	COUNTDECS_SET:
+		LD		DECStemp, X
+		OUT		PORTD, DECStemp
+		RJMP	TIMER_RETURN
 
-    ; Incrementar contador principal
-    inc ContadorLED
-    cpi ContadorLED, 16; Cuando sea 16 => da a 1. Salta a la siguente. 
 
-    brlo CONTINUE_TIMER
-    clr ContadorLED; Limpio mi contador.
+PIN_CHANGE:
+	SEI		; Habilitamos interrupciones anidadas
 
-CONTINUE_TIMER:
-    rcall CONVERTIR_BCD; 
+	;Reviso cambio en COUNTUP_BUTTON, si fue presionado, ver estado anterior, si todo bien incrementar el contador 
+	;Si no fue presionado, su estado será no presionado y revisamos COUNTDWN_BUTTON
 
-TIMER_EXIT:
-	reti
+	SBIS		PINC, 1
+	RJMP		COUNTUP_SEG
+	LDI			PUSHBOTTON_B, 0b00000001
+
+	;Si countDWN_BUTTON se encuentra presionado, nos vamos a revisar su estado anterior para verificar si es correcto decrementar el valor de COUNT
+	; si el bot n NO se encuentra presionado, regresamos al main
+
+	RETURN_UP:
+		SBIS		PINC, 0
+		RJMP		COUNTDWN_SEG
+		LDI			PUSHBOTTON_B, 0b00000001
+	RETURN_DWN:
+		RETI
 	
 
 /****************************************/
