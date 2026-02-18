@@ -51,17 +51,7 @@ DISPRAM:
 ;========================
 ; Registros
 ;========================
-/*
-	.def ContadorLED   = r16
-	.def Temp          = r17
-	.def D1            = r18
-	.def D2            = r19
-	;Parte del  Lab y Post:
 
-	.def TimerCount = r20
-	.def BCD_Unidad = r21
-	.def BCD_Decena = r22
-	*/
 	.def	MILLIS		= R19
 	.def	COUNTDECS	= R18
 	.def	COUNTSECS	= R20
@@ -87,6 +77,7 @@ SETUP:
 
 
 	;Almacenamos datos manualmente en RAM
+	; No sé si hay una mejor manera.
 	LDI	R16, 0x3F
 	ST	X+, R16
 
@@ -135,30 +126,92 @@ SETUP:
 	LDI	R16, 0x71
 	ST	X+, R16
 
+	;Re-dirigimos el PUNTERO de x
 
+	LDI		XL, LOW(DISPRAM << 1)
+	LDI		XH, HIGH(DISPRAM << 1)
 
+	/***************************************************/
+	;--------------Configurar STACK---------
+	LDI		R16, LOW(RAMEND)
+	OUT		SPL, R16
+	LDI		R16, HIGH(RAMEND)
+	OUT		SPH, R16
 
-/****************************************/
+	;---------Configurar de 16MHz a 1MHz------------------
+
+	LDI		R16, (1 << CLKPCE)
+	STS		CLKPR, R16
+
+	LDI		R16, (1 << CLKPS2)
+	STS		CLKPR, R16
+
+	;--------Deshabilitar comunicación serial-------UART
+	LDI		R16, 0x00
+	STS		UCSR0B, R16
+
+	; --------------Configuración de los Pines para el puerto D-----
+	;Configurar I/O PORTS
+	LDI		R16, 0x7F			;0b01111111, se activaron  casi todos menos el puntito.
+	OUT		DDRD, R16			; Se les asigna a la dirección
+
+	CLR R16					; limpio mi variable (setear a cero)
+	OUT PORTD, R16				; Les mando 0 voltios para empezar. 
+
+	/****************************************/
 //  ---Puertos- MCU--- Salidas y Entradas.
 
-;CONTADOR (PreLAB):
-; Se establece como salidas puerto B salidas (LEDs)
-    ldi Temp, 0b00001111; 0x0F
-    out DDRB, Temp
+	;PORTB: BIN Out (PB0,1,2,3)
+	LDI		R16, 0x0F
+	OUT		DDRB, R16
+	LDI		R16, 0x00
+	OUT		PORTB, R16
 
-; Apagar LEDs AL iniciar con el código 
-    clr Temp
-    out PORTB, Temp
+	;PORTC: BIN In (PC0,1), DISPSMUXOUT (PC2,3)
+	LDI		R16, 0b00001100
+	OUT		DDRC, R16
+	LDI		R16, 0b00000111 ;Comenzamos encendiendo DISPUNIS
+	OUT		PORTC, R16
+
+	;Valores iniciales de registros importantes
+	LDI		COUNT, 0
+	LDI		MILLIS, 0x00
+	LDI		COUNTSECS, 0x00
+	LDI		COUNTDECS, 0x00
+	LDI		PUSHBOTTON_A, 0b00000001
+	LDI		PUSHBOTTON_B, 0b00000001
+	LPM		SECStemp, Z
+	;COM		SECStemp  ; Invierte los bits porqué es ánodo comúm
+	OUT		PORTD, SECStemp
+	LD		DECStemp, X
+	;COM		DECStemp  ; Invierte los bits
+	OUT		PORTD, DECStemp
 
 
-; ---------PC0 y PC1 entradas con pull-up-----
-; Lo hago de esta forma porque es más rapido, además me trajo complicaciones con la asignación de binario.
+	;Config. de TIMER0 en modo NORMAL e interrupciones
+	; Mini cálculo: 
+	;Compare value: TCNT0 = 256-156.25 = 99.75 (10ms)
 
-    cbi DDRC, PC0				; clear bit, voy a la dirección y le digo que es 0
-    cbi DDRC, PC1
-	; Se activan los pullup
-    sbi PORTC, PC0				; le asigno 1, para que se active
-    sbi PORTC, PC1
+	LDI		R16, (1 << CS01) | (1 << CS00)		;Prescaler 64
+
+	OUT		TCCR0B, R16
+	LDI		R16, (1 << TOIE0) 
+	STS		TIMSK0, R16
+	LDI		R16, 100
+	OUT		TCNT0, R16
+
+	;-----------Habilitacin de Interrupciones en PORTC------------
+	LDI		R16, (1 << PCIE1)
+	STS		PCICR, R16
+	LDI		R16, 0x03
+	STS		PCMSK1, R16
+	//-------------------------------------------------------------
+
+	SEI ; Ahora sí mis interrupciones para el código
+
+
+
+
 
 ;--------------------------------
 ; Habilitar Pin Change Interrupt
@@ -169,12 +222,7 @@ SETUP:
     ldi temp, (1<<PCINT8)|(1<<PCINT9)
     sts PCMSK1, temp
 
-; --------------Configuración de los Pines para el puerto D-----
-	LDi Temp, 0x7F				;0b01111111, se activaron  casi todos menos el puntito. 
-	OUT DDRD, Temp				; Se les asigna a la dirección
-	; Setear a cero para empezar
-	CLR Temp					; limpio mi variable (setear a cero)
-	OUT PORTD,Temp				; Les mando 0 voltios para empezar. 
+
 
 ;-------------------------
 ; Timer0: Para el conteo.
