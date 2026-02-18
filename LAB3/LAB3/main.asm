@@ -214,20 +214,33 @@ SETUP:
 // Loop Infinito
 MAIN_LOOP:
 	; Aqui puedo poner la parte de la multiplexación. La logica. Pues es el Timero el que dirá lo demás.
+	;En cada segundo verificar si van 10, si llega a 10 reiniciamos el Display de(COUNTSECS) y aumentamos(COUNTDECS)
+	COUNTSECS_UP:
+		CLR		MILLIS; limpio los milis
+		INC		COUNTSECS; ahora incremento mis segundos
+		CPI		COUNTSECS, 10; lo compara en caso de que sea 1, entonces salta a la siguiente etiqueta
+		BREQ	Limpiar; Si lo anterior fue igual a 1=> Limpia sin generar un incremento en D
+		ADIW	Z, 1
 
-	; Mostrar unidades
-    mov Temp, BCD_Unidad
-    out PORTD, Temp
-							; activar display unidades
-							; (ejemplo: sbi PORTB, 4)
-    rcall DELAY_REBOTE		; Mi delay
+		RJMP	LOOP
 
-    ; Mostrar decenas
-    mov Temp, BCD_Decena
-    out PORTD, Temp
-							; activar display decenas
-							; (ejemplo: sbi PORTB, 5)
-    rcall DELAY_REBOTE		; Mi delay
+
+	Limpiar:
+		CLR		COUNTSECS; limpia los segundos y 
+		LDI		ZL, LOW(TABLA << 1); se carga la primera parte de abajo de mi tabla al puntero
+		LDI		ZH, HIGH(TABLA << 1); se carga la parte de arriba de esta. 
+		
+		INC		COUNTDECS
+		CPI		COUNTDECS, 6; comparo si las decimas ya llegaron a 6
+		BREQ	Limpiar2; si la co mparación es cierta, se salta a la etiquea de limpiar 2 para limpia las decimas
+		ADIW	X, 1
+		RJMP	LOOP
+
+	;Si ya van 60 segundos en el conteo, reiniciamos el Display del contador de decenas de segundo (COUNTSECS)...
+	Limpiar2:
+		clr		COUNTDECS; se vuelkve a cero nuevamente. 
+		LDI		XL, LOW(DISPRAM << 1)
+		ldi 	XH, HIGH(DISPRAM << 1)
 
     RJMP    MAIN_LOOP
 /*********************************************************/
