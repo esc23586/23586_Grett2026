@@ -1,20 +1,3 @@
-/*
-* PRELAB3.asm
-*
-* Creado: 17 de feb 
-* Autor : Grettel Escobedo 23586
-* Descripción: Implemente un contador binario de 4 bits, con lógica on-change y pullups internos.
-
-*Parte del laboratorio: Implementar un contador en hexa de 4 bits utilizando una interrupción del TMR0. 
-*La interrupción del TMR0 deberá ser entre 5 y 20ms, pero el contador deberá cambiar cada 1000ms. 
-*Muestre el contador con el TMR0 en un display de 7 segmentos, de manera que se muestre el conteo en segundos.
-*Se espera que la vuelta del overflow sea. De esta manera se dara una cada segundo.
-
-; Según la logica del prescaler que utilizo, en teoria da 61 overflows de hecho
-; Utilicé lógica de 2 punteros, pq me odio mucho
-*/
-/****************************************/
-// Encabezado (Definición de Registros, Variables y Constantes)
 .include "M328PDEF.inc"     // Include definitions specific to ATMega328P
 //variable_name:     .byte   1   // Memory alocation for variable_name:     .byte   (byte size)
 .dseg
@@ -29,6 +12,11 @@ DISPRAM:
 .org PCI1addr;Pueba, luego cambiar a un nombre más significativo;
 	rjmp ISR_PCINT1; mi ubicación al saltar en la etiqueta. 
 
+; Parte del Laboratorio:
+/*
+.org 0x001A      ; Dirección TIMER0_OVF según el datasheet
+	rjmp ISR_TIMER0
+*/
 
 ;Guardamos un salto a la sub-rutina "RESET_TOGGLE" (cuando el timero se desvorda salta a la etiqueta)
 .org  OVF0addr
@@ -58,10 +46,6 @@ DISPRAM:
 
 	.def	PUSHBOTTON_A	= R23
 	.def	PUSHBOTTON_B	= R24
-	;.def ContadorLED   = r16
-	;.def Temp          = r17
-	;.def D1            = r18
-	;.def D2            = r19
 
  /****************************************/
 // Configuración de mis punteros 
@@ -173,14 +157,12 @@ SETUP:
 	LDI		R16, 0x00
 	OUT		PORTB, R16
 
-	;PORTC: BIN In (PC0,1),              (Parte donde asigno para la salida lógica transitores)(PC2,3)
+	;PORTC: BIN In (PC0,1),               DISPSMUXOUT (PC2,3)
 	LDI		R16, 0b00001100
 	OUT		DDRC, R16
-	LDI		R16, 0b00000111 ;Comenzamos encendiendo DISPUNIS(estado inciial impar para que toggle de forma impar)
+	LDI		R16, 0b00000111 ;Comenzamos encendiendo DISPUNIS
 	OUT		PORTC, R16
 
-
-	;===============================================
 	;Valores iniciales de registros importantes
 	; los incializo con 0
 	LDI		COUNT, 0
@@ -190,13 +172,9 @@ SETUP:
 	LDI		PUSHBOTTON_A, 0b00000001
 	LDI		PUSHBOTTON_B, 0b00000001
 
-	;clr ContadorLED
-    ;out PORTB, ContadorLED
-	:====================================================
-
 	;Carga el primer valor de tabla (0) desde FLASH y lo muestra
 	LPM		SECStemp, Z
-	;COM		SECStemp			; Invierte los bits en caso ser ánodo comúm
+	;COM		SECStemp			; Invierte los bits porqué es ánodo comúm
 	OUT		PORTD, SECStemp
 	LD		DECStemp, X
 	;COM		DECStemp			; Invierte los bits
@@ -270,10 +248,7 @@ MAIN_LOOP:
     RJMP    MAIN_LOOP
 /*********************************************************/
 // NON-Interrupt subroutines
-;===============================
 ;parte de incremento y decremento:
-;==============================
-
 
 COUNTUP_SEG:
 	BST		PUSHBOTTON_A, 0; en caso el boton para incrementar fue presionado 
@@ -282,7 +257,7 @@ COUNTUP_SEG:
 
 	BRTC	RETURN_UP; Branch if T Cleared, En caso T=0
 	CALL	COUNTUP; LLama a la subrutina para contar 
-	LDI		PUSHBOTTON_A,	0b00000000; y ya no volverá a incrementar hasta que se vuelva a dar una buena interrupcióin 
+	LDI		PUSHBOTTON_A,	0b00000000; y ya no volverá a incrementar hasta que se vuelva a dar una interrupcióin genuina . 
 	; Esto puesto que en T se copiaria el valor 0, por eso no incrementa.
 
 	RJMP		RETURN_UP
@@ -307,66 +282,6 @@ COUNTDWN:
 	ldi		COUNT, 0x0F
 	out		PORTB, COUNT
 	ret
-
-	/*
-	;=========================
-;   ANTIRREBOTE_INC
-;===================
-ANTIRREBOTE_INC:
-    rcall DELAY_REBOTE      ; Esperar a que pase el rebote
-
-    in temp, PINC           ; Leer otra vez el pin
-    sbrs temp, 0            ; Si sigue en 0 ? botón realmente presionado
-    rcall INCREMENTAR
-
-    ret
-;=========================
-;   ANTIRREBOTE_DEC
-;=======================
-ANTIRREBOTE_DEC:
-    rcall DELAY_REBOTE
-
-    in temp, PINC
-    sbrs temp, 1
-    rcall DECREMENTAR
-
-    ret
-
-
-
-;========================
-; INCREMENTAR
-;========================
-INCREMENTAR:
-    inc ContadorLED
-    andi ContadorLED, 0x0F   ; Limitar a 4 bits
-    out PORTB, ContadorLED
-    ret
-
-;========================
-; DECREMENTAR
-;========================
-DECREMENTAR:
-    dec ContadorLED
-    andi ContadorLED, 0x0F
-    out PORTB, ContadorLED
-    ret
-
-;==============================
-; SUBRUTINA ANTIRREBOTE:
-;==============================
-DELAY_REBOTE:
-    ldi D1, 100
-DLY1:
-    ldi D2, 100
-DLY2:
-    dec D2
-    brne DLY2
-    dec D1
-    brne DLY1
-    ret
-	*/
-
 
 /******************************************************/
 
@@ -427,7 +342,7 @@ ISR_PCINT1:
 	LDI			PUSHBOTTON_B, 0b00000001
 
 	;Si countDWN_BUTTON se encuentra presionado, nos vamos a revisar su estado anterior para verificar si es correcto decrementar el valor de COUNT
-	; si el boton NO se encuentra presionado, regresamos al main
+	; si el bot n NO se encuentra presionado, regresamos al main
 
 	RETURN_UP:
 		SBIS		PINC, 0
@@ -435,4 +350,4 @@ ISR_PCINT1:
 		LDI			PUSHBOTTON_B, 0b00000001
 	RETURN_DWN:
 		RETI
-/****************************************/
+	
