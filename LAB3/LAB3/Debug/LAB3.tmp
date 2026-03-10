@@ -24,22 +24,21 @@
  </OUTPUT_FILES>
  <LABELS>
   <DISPRAM><FILE>C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB3\LAB3\main.asm</FILE><LINE>21</LINE></DISPRAM>
-  <SETUP><FILE>C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB3\LAB3\main.asm</FILE><LINE>70</LINE></SETUP>
-  <ISR_PCINT1><FILE>C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB3\LAB3\main.asm</FILE><LINE>360</LINE></ISR_PCINT1>
-  <RESET_TOGGLE><FILE>C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB3\LAB3\main.asm</FILE><LINE>335</LINE></RESET_TOGGLE>
-  <TABLA><FILE>C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB3\LAB3\main.asm</FILE><LINE>49</LINE></TABLA>
-  <MAIN_LOOP><FILE>C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB3\LAB3\main.asm</FILE><LINE>229</LINE></MAIN_LOOP>
-  <COUNTSECS_UP><FILE>C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB3\LAB3\main.asm</FILE><LINE>237</LINE></COUNTSECS_UP>
-  <Limpiar><FILE>C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB3\LAB3\main.asm</FILE><LINE>247</LINE></Limpiar>
-  <Limpiar2><FILE>C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB3\LAB3\main.asm</FILE><LINE>260</LINE></Limpiar2>
-  <COUNTUP_SEG><FILE>C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB3\LAB3\main.asm</FILE><LINE>273</LINE></COUNTUP_SEG>
-  <RETURN_UP><FILE>C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB3\LAB3\main.asm</FILE><LINE>373</LINE></RETURN_UP>
-  <COUNTUP><FILE>C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB3\LAB3\main.asm</FILE><LINE>285</LINE></COUNTUP>
-  <NO_RESET><FILE>C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB3\LAB3\main.asm</FILE><LINE>294</LINE></NO_RESET>
-  <COUNTDWN_SEG><FILE>C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB3\LAB3\main.asm</FILE><LINE>298</LINE></COUNTDWN_SEG>
-  <RETURN_DWN><FILE>C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB3\LAB3\main.asm</FILE><LINE>377</LINE></RETURN_DWN>
-  <COUNTDWN><FILE>C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB3\LAB3\main.asm</FILE><LINE>305</LINE></COUNTDWN>
-  <COUNTDECS_SET><FILE>C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB3\LAB3\main.asm</FILE><LINE>354</LINE></COUNTDECS_SET>
-  <TIMER_RETURN><FILE>C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB3\LAB3\main.asm</FILE><LINE>351</LINE></TIMER_RETURN>
+  <SETUP><FILE>C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB3\LAB3\main.asm</FILE><LINE>69</LINE></SETUP>
+  <ISR_PCINT1><FILE>C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB3\LAB3\main.asm</FILE><LINE>419</LINE></ISR_PCINT1>
+  <RESET_TOGGLE><FILE>C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB3\LAB3\main.asm</FILE><LINE>394</LINE></RESET_TOGGLE>
+  <TABLA><FILE>C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB3\LAB3\main.asm</FILE><LINE>44</LINE></TABLA>
+  <MAIN_LOOP><FILE>C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB3\LAB3\main.asm</FILE><LINE>234</LINE></MAIN_LOOP>
+  <COUNTSECS_UP><FILE>C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB3\LAB3\main.asm</FILE><LINE>242</LINE></COUNTSECS_UP>
+  <Limpiar><FILE>C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB3\LAB3\main.asm</FILE><LINE>252</LINE></Limpiar>
+  <Limpiar2><FILE>C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB3\LAB3\main.asm</FILE><LINE>265</LINE></Limpiar2>
+  <COUNTUP_SEG><FILE>C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB3\LAB3\main.asm</FILE><LINE>278</LINE></COUNTUP_SEG>
+  <RETURN_UP><FILE>C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB3\LAB3\main.asm</FILE><LINE>432</LINE></RETURN_UP>
+  <COUNTUP><FILE>C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB3\LAB3\main.asm</FILE><LINE>290</LINE></COUNTUP>
+  <COUNTDWN_SEG><FILE>C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB3\LAB3\main.asm</FILE><LINE>297</LINE></COUNTDWN_SEG>
+  <RETURN_DWN><FILE>C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB3\LAB3\main.asm</FILE><LINE>436</LINE></RETURN_DWN>
+  <COUNTDWN><FILE>C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB3\LAB3\main.asm</FILE><LINE>304</LINE></COUNTDWN>
+  <COUNTDECS_SET><FILE>C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB3\LAB3\main.asm</FILE><LINE>413</LINE></COUNTDECS_SET>
+  <TIMER_RETURN><FILE>C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB3\LAB3\main.asm</FILE><LINE>410</LINE></TIMER_RETURN>
  </LABELS>
 </ASSEMBLER_INFO>

@@ -1,5 +1,5 @@
 
-AVRASM ver. 2.2.8  C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB3\LAB3\main.asm Tue Feb 24 12:53:17 2026
+AVRASM ver. 2.2.8  C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB3\LAB3\main.asm Tue Feb 24 13:57:44 2026
 
 [builtin](2): Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\avrasm\inc\m328Pdef.inc'
 C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB3\LAB3\main.asm(18): Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\avrasm\inc\M328PDEF.inc'
@@ -1058,17 +1058,12 @@ C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB3
 000000 c029                      	rjmp SETUP
                                  
                                  .org PCI1addr;Pueba, luego cambiar a un nombre más significativo;
-000008 c0b2                      	rjmp ISR_PCINT1; mi ubicación al saltar en la etiqueta. 
+000008 c0b1                      	rjmp ISR_PCINT1; mi ubicación al saltar en la etiqueta. 
                                  
-                                 ; Parte del Laboratorio:
-                                 /*
-                                 .org 0x001A      ; Dirección TIMER0_OVF según el datasheet
-                                 	rjmp ISR_TIMER0
-                                 */
                                  
                                  ;Guardamos un salto a la sub-rutina "RESET_TOGGLE" (cuando el timero se desvorda salta a la etiqueta)
                                  .org  OVF0addr
-000020 c08d                      	RJMP RESET_TOGGLE
+000020 c08c                      	RJMP RESET_TOGGLE
                                  
                                  .org 0x0022
                                   /****************************************/
@@ -1101,6 +1096,10 @@ C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB3
                                  
                                  	.def	PUSHBOTTON_A	= R23
                                  	.def	PUSHBOTTON_B	= R24
+                                 	;.def ContadorLED   = r16
+                                 	;.def Temp          = r17
+                                 	;.def D1            = r18
+                                 	;.def D2            = r19
                                  
                                   /****************************************/
                                  // Configuración de mis punteros 
@@ -1218,6 +1217,8 @@ C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB3
 000068 e007                      	LDI		R16, 0b00000111 ;Comenzamos encendiendo DISPUNIS(estado inciial impar para que toggle de forma impar)
 000069 b908                      	OUT		PORTC, R16
                                  
+                                 
+                                 	;===============================================
                                  	;Valores iniciales de registros importantes
                                  	; los incializo con 0
 00006a e060                      	LDI		COUNT, 0
@@ -1226,6 +1227,10 @@ C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB3
 00006d e020                      	LDI		COUNTDECS, 0x00
 00006e e071                      	LDI		PUSHBOTTON_A, 0b00000001
 00006f e081                      	LDI		PUSHBOTTON_B, 0b00000001
+                                 
+                                 	;clr ContadorLED
+                                     ;out PORTB, ContadorLED
+                                 	;====================================================
                                  
                                  	;Carga el primer valor de tabla (0) desde FLASH y lo muestra
 000070 9154                      	LPM		SECStemp, Z
@@ -1313,39 +1318,93 @@ C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB3
                                  	; bst: Bit Store from Register to T flag. Lo que hace es fuardar en la Tflag del sreg
                                  	; Basicaente es la memoria del bit como estado anterior. 
                                  
-000098 f536                      	BRTC	RETURN_UP; Branch if T Cleared, En caso T=0
+000098 f52e                      	BRTC	RETURN_UP; Branch if T Cleared, En caso T=0
 000099 940e 009d                 	CALL	COUNTUP; LLama a la subrutina para contar 
 00009b e070                      	LDI		PUSHBOTTON_A,	0b00000000; y ya no volverá a incrementar hasta que se vuelva a dar una buena interrupcióin 
                                  	; Esto puesto que en T se copiaria el valor 0, por eso no incrementa.
                                  
-00009c c022                      	RJMP		RETURN_UP
+00009c c021                      	RJMP		RETURN_UP
                                  
                                  COUNTUP:
 00009d 9563                      	INC		COUNT
-                                 	;SBRS	COUNT, 4 ;Skip if Bit in Register Set, Si el bit 4 de COUNT = 1 , entonces no se salta
-                                 	;CLR		COUNT
-                                 	;OUT		PORTB, COUNT
-                                 
-00009e 3160                      	CPI     COUNT, 16      ; ¿Llegó a 16?
-00009f f409                          BRNE    NO_RESET
-0000a0 2766                          CLR     COUNT
-                                 NO_RESET:
-0000a1 b965                          OUT     PORTB, COUNT
-0000a2 9508                      	RET	
+00009e ff64                      	SBRS	COUNT, 4 ;Skip if Bit in Register Set, Si el bit 4 de COUNT = 1 , entonces no se salta
+00009f 2766                      	CLR		COUNT
+0000a0 b965                      	OUT		PORTB, COUNT
+0000a1 9508                      	RET	
                                  
                                  COUNTDWN_SEG:
-0000a3 fb80                      	bst		PUSHBOTTON_B, 0
-0000a4 f4ee                      	BRTC	RETURN_DWN
-0000a5 940e 00a9                 	call	COUNTDWN
-0000a7 e080                      	ldi		PUSHBOTTON_B,	0b00000000
-0000a8 c019                      	rjmp	RETURN_DWN
+0000a2 fb80                      	bst		PUSHBOTTON_B, 0
+0000a3 f4ee                      	BRTC	RETURN_DWN
+0000a4 940e 00a8                 	call	COUNTDWN
+0000a6 e080                      	ldi		PUSHBOTTON_B,	0b00000000
+0000a7 c019                      	rjmp	RETURN_DWN
                                  
                                  COUNTDWN:
-0000a9 956a                      	DEC		COUNT
-0000aa ff67                      	SBRS	COUNT, 7
-0000ab e06f                      	ldi		COUNT, 0x0F
-0000ac b965                      	out		PORTB, COUNT
-0000ad 9508                      	ret
+0000a8 956a                      	DEC		COUNT
+0000a9 ff67                      	SBRS	COUNT, 7
+0000aa e06f                      	ldi		COUNT, 0x0F
+0000ab b965                      	out		PORTB, COUNT
+0000ac 9508                      	ret
+                                 
+                                 	/*
+                                 ;=========================
+                                 ;   ANTIRREBOTE_INC
+                                 ;===================
+                                 ANTIRREBOTE_INC:
+                                     rcall DELAY_REBOTE      ; Esperar a que pase el rebote
+                                 
+                                     in temp, PINC           ; Leer otra vez el pin
+                                     sbrs temp, 0            ; Si sigue en 0 ? botón realmente presionado
+                                     rcall INCREMENTAR
+                                 
+                                     ret
+                                 ;=========================
+                                 ;   ANTIRREBOTE_DEC
+                                 ;=======================
+                                 ANTIRREBOTE_DEC:
+                                     rcall DELAY_REBOTE
+                                 
+                                     in temp, PINC
+                                     sbrs temp, 1
+                                     rcall DECREMENTAR
+                                 
+                                     ret
+                                 
+                                 
+                                 
+                                 ;========================
+                                 ; INCREMENTAR
+                                 ;========================
+                                 INCREMENTAR:
+                                     inc ContadorLED
+                                     andi ContadorLED, 0x0F   ; Limitar a 4 bits
+                                     out PORTB, ContadorLED
+                                     ret
+                                 
+                                 ;========================
+                                 ; DECREMENTAR
+                                 ;========================
+                                 DECREMENTAR:
+                                     dec ContadorLED
+                                     andi ContadorLED, 0x0F
+                                     out PORTB, ContadorLED
+                                     ret
+                                 
+                                 ;==============================
+                                 ; SUBRUTINA ANTIRREBOTE:
+                                 ;==============================
+                                 DELAY_REBOTE:
+                                     ldi D1, 100
+                                 DLY1:
+                                     ldi D2, 100
+                                 DLY2:
+                                     dec D2
+                                     brne DLY2
+                                     dec D1
+                                     brne DLY1
+                                     ret
+                                 	*/
+                                 
                                  
                                  /******************************************************/
                                  
@@ -1375,47 +1434,45 @@ C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB3
                                  	;y para "togglear" qu  display se muestra (Unidades de segundo o decenas de segundo)
                                  	;Reiniciamos TIMER0 e incrementamos COUNTMILLIS
                                  
-0000ae 9533                      	INC		MILLIS
-0000af e604                      	LDI		R16, 100
-0000b0 bd06                      	OUT		TCNT0, R16
-0000b1 9a32                      	SBI		PINC, 2		;Toggleamos el bit del transistor de DISPUNIS
-0000b2 9a33                      	SBI		PINC, 3		;Toggleamos el bit del transistor de DISPDECS
+0000ad 9533                      	INC		MILLIS
+0000ae e604                      	LDI		R16, 100
+0000af bd06                      	OUT		TCNT0, R16
+0000b0 9a32                      	SBI		PINC, 2		;Toggleamos el bit del transistor de DISPUNIS
+0000b1 9a33                      	SBI		PINC, 3		;Toggleamos el bit del transistor de DISPDECS
                                  	;Si el bit del transistor DISPUNIS est  encendido up DISPUNIS en PORTD y si está apagado en PORTD
-0000b3 9b42                      	SBIS	PORTC, 2
-0000b4 c003                      	RJMP	COUNTDECS_SET
-0000b5 9154                      	LPM		SECStemp, Z
-0000b6 b95b                      	OUT		PORTD, SECStemp
+0000b2 9b42                      	SBIS	PORTC, 2
+0000b3 c003                      	RJMP	COUNTDECS_SET
+0000b4 9154                      	LPM		SECStemp, Z
+0000b5 b95b                      	OUT		PORTD, SECStemp
                                  
                                  	TIMER_RETURN:
-0000b7 9518                      	RETI
+0000b6 9518                      	RETI
                                  
                                  	COUNTDECS_SET:
-0000b8 919c                      		LD		DECStemp, X
-0000b9 b99b                      		OUT		PORTD, DECStemp
-0000ba cffc                      		RJMP	TIMER_RETURN
+0000b7 919c                      		LD		DECStemp, X
+0000b8 b99b                      		OUT		PORTD, DECStemp
+0000b9 cffc                      		RJMP	TIMER_RETURN
                                  
                                  
                                  ISR_PCINT1:
-0000bb 9478                      	SEI		; Habilitamos interrupciones anidadas
+0000ba 9478                      	SEI		; Habilitamos interrupciones anidadas
                                  
                                  	;Reviso cambio en COUNTUP_BUTTON, si fue presionado, ver estado anterior, si todo bien incrementar el contador 
                                  	;Si no fue presionado, su estado será no presionado y revisamos COUNTDWN_BUTTON
                                  
-0000bc 9b31                      	SBIS		PINC, 1
-0000bd cfd9                      	RJMP		COUNTUP_SEG
-0000be e081                      	LDI			PUSHBOTTON_B, 0b00000001
+0000bb 9b31                      	SBIS		PINC, 1
+0000bc cfda                      	RJMP		COUNTUP_SEG
+0000bd e081                      	LDI			PUSHBOTTON_B, 0b00000001
                                  
                                  	;Si countDWN_BUTTON se encuentra presionado, nos vamos a revisar su estado anterior para verificar si es correcto decrementar el valor de COUNT
                                  	; si el boton NO se encuentra presionado, regresamos al main
                                  
                                  	RETURN_UP:
-0000bf 9b30                      		SBIS		PINC, 0
-0000c0 cfe2                      		RJMP		COUNTDWN_SEG
-0000c1 e081                      		LDI			PUSHBOTTON_B, 0b00000001
+0000be 9b30                      		SBIS		PINC, 0
+0000bf cfe2                      		RJMP		COUNTDWN_SEG
+0000c0 e081                      		LDI			PUSHBOTTON_B, 0b00000001
                                  	RETURN_DWN:
-0000c2 9518                      		RETI
-                                 	
-                                 
+0000c1 9518                      		RETI
 
 
 RESOURCE USE INFORMATION
@@ -1445,27 +1502,27 @@ Registers used: 15 out of 35 (42.9%)
 andi  :   0 asr   :   0 bclr  :   0 bld   :   0 brbc  :   0 brbs  :   0 
 brcc  :   0 brcs  :   0 break :   0 breq  :   3 brge  :   0 brhc  :   0 
 brhs  :   0 brid  :   0 brie  :   0 brlo  :   0 brlt  :   0 brmi  :   0 
-brne  :   1 brpl  :   0 brsh  :   0 brtc  :   2 brts  :   0 brvc  :   0 
+brne  :   0 brpl  :   0 brsh  :   0 brtc  :   2 brts  :   0 brvc  :   0 
 brvs  :   0 bset  :   0 bst   :   2 call  :   2 cbi   :   0 cbr   :   0 
 clc   :   0 clh   :   0 cli   :   1 cln   :   0 clr   :   5 cls   :   0 
 clt   :   0 clv   :   0 clz   :   0 com   :   0 cp    :   0 cpc   :   0 
-cpi   :   4 cpse  :   0 dec   :   1 eor   :   0 fmul  :   0 fmuls :   0 
+cpi   :   3 cpse  :   0 dec   :   1 eor   :   0 fmul  :   0 fmuls :   0 
 fmulsu:   0 icall :   0 ijmp  :   0 in    :   0 inc   :   4 jmp   :   0 
 ld    :   2 ldd   :   0 ldi   :  53 lds   :   0 lpm   :   4 lsl   :   0 
 lsr   :   0 mov   :   0 movw  :   0 mul   :   0 muls  :   0 mulsu :   0 
 neg   :   0 nop   :   0 or    :   0 ori   :   0 out   :  17 pop   :   0 
 push  :   0 rcall :   0 ret   :   2 reti  :   2 rjmp  :  13 rol   :   0 
 ror   :   0 sbc   :   0 sbci  :   0 sbi   :   2 sbic  :   0 sbis  :   3 
-sbiw  :   0 sbr   :   0 sbrc  :   0 sbrs  :   1 sec   :   0 seh   :   0 
+sbiw  :   0 sbr   :   0 sbrc  :   0 sbrs  :   2 sec   :   0 seh   :   0 
 sei   :   2 sen   :   0 ser   :   0 ses   :   0 set   :   0 sev   :   0 
 sez   :   0 sleep :   0 spm   :   0 st    :  16 std   :   0 sts   :   6 
 sub   :   0 subi  :   0 swap  :   0 tst   :   0 wdr   :   0 
-Instructions used: 24 out of 113 (21.2%)
+Instructions used: 23 out of 113 (20.4%)
 
 "ATmega328P" memory use summary [bytes]:
 Segment   Begin    End      Code   Data   Used    Size   Use%
 ---------------------------------------------------------------
-[.cseg] 0x000000 0x000186    312     16    328   32768   1.0%
+[.cseg] 0x000000 0x000184    310     16    326   32768   1.0%
 [.dseg] 0x000100 0x000110      0     16     16    2048   0.8%
 [.eseg] 0x000000 0x000000      0      0      0    1024   0.0%
 

@@ -1,3 +1,23 @@
+/*
+* NombreProgra.asm
+*
+* Creado: 24 de abril del 2026
+* Autor : Grettel Escobedo 23586
+* Descripción: Creación de un codigo modular para el proyecto 1 de microcontroladores. 
+*/
+;=======================================
+;Configuraciónnes 
+; Aclaraciones
+
+; TIMER0- multiplexación
+; TIMER1 - conteo de minutos y horas.
+
+
+; Hay un total de 3 leds por modo general, 1 buzzer como salida del modo 5, 2 leds para las horas.
+; Se trabaja con un total de 6 modos. 3 generales y 3 de configuración. 
+;
+
+;=======================================================================
 .include "M328PDEF.inc"     // Include definitions specific to ATMega328P
 //variable_name:     .byte   1   // Memory alocation for variable_name:     .byte   (byte size)
 .dseg
@@ -12,28 +32,24 @@ DISPRAM:
 .org PCI1addr;Pueba, luego cambiar a un nombre más significativo;
 	rjmp ISR_PCINT1; mi ubicación al saltar en la etiqueta. 
 
-; Parte del Laboratorio:
-/*
-.org 0x001A      ; Dirección TIMER0_OVF según el datasheet
-	rjmp ISR_TIMER0
-*/
-
 ;Guardamos un salto a la sub-rutina "RESET_TOGGLE" (cuando el timero se desvorda salta a la etiqueta)
 .org  OVF0addr
 	RJMP RESET_TOGGLE
 
 .org 0x0022
- /****************************************/
- ;========================================================
+ /*****************************************************************/
+
+
+ ;=====================================
 ; Tablita para los valores del display
-;========================================================
+;======================================
 ; revisar si rompe el códgio. ojalá no.
 
 	TABLA:	
 		.DB	0x3F, 0x06, 0x5B, 0x4F, 0x66, 0x6D, 0x7D, 0x07, 0x7F, 0x67, 0x77, 0x7C, 0x39, 0x5E, 0x79, 0x71
 		
 ;========================
-; Registros
+;       Registros
 ;========================
 
 	.def	MILLIS		= R19; Variable para mi milisegundos
@@ -44,8 +60,22 @@ DISPRAM:
 	.def	DECStemp	= R25
 	.def	COUNT		= R22
 
-	.def	PUSHBOTTON_A	= R23
-	.def	PUSHBOTTON_B	= R24
+	.def	PUSHBOTTON_A	=  R8;R23 B1_ MODO : HORA/FECHA/ALARMA  --- Cambiarlo a un R diferente
+	.def	PUSHBOTTON_B	=  R7;R24 B2_CONFIGURACIÓN DEFEPENDIENDO DEL MODO --- Cambiarlo a un R diferente
+	
+	; nuevos registros 
+	
+	.def	MIN_UNITS	= R9; Cuanta la unidades de los minutos
+	.def	MIN_TENS	= R10; Cuenta las decenas de minutos
+	.def	HOUR_UNITS	= R11; Cuenta la unidades de minutos
+	.def	HOUR_TENS	= R12; Cuenta las decenas de minutos
+	.def	VTEMP		= R23
+	; estos según yo no puede hacer el compare:
+	//.def  PUSHBOTTON_C	= R13 ; B3_INC
+	//.def	PUSHBOTTON_D	= R14 ; B4_DECREMENTO
+	//.def  PUSHBOTTON_E	= R15 ; BOTON IZQUIERDA DURANTE CONFIGURACIÓN | APAGAR ALARMA FUERA DE CONFIGURACIÓN.
+
+	//Registro 25 en adelante ya está recervado para el puntero. que troste. 
 
  /****************************************/
 // Configuración de mis punteros 
@@ -53,15 +83,15 @@ DISPRAM:
 SETUP:
 	cli; Desactivo las interrupciones.
 
-	;PUNTERO Z (Unidades de segundo); quiero que vaya apuntando a mis valores
+	;PUNTERO Z (Unidades de segundo); quiero que vaya apuntando a mis valores, los de la tabla.
 	LDI	ZL, LOW(TABLA << 1)
 	LDI	ZH, HIGH(TABLA << 1)
 
-	;Puntero x (Decenas de segundo)
+	;Puntero x (Decenas de segundo); valores de la dispram
 	LDI	XL, LOW(DISPRAM << 1)
 	LDI	XH, HIGH(DISPRAM << 1)
 
-
+	; logica de doble puntero. 
 
 	;Almacenamos datos manualmente en RAM
 	; No sé si hay una mejor manera.
@@ -149,8 +179,6 @@ SETUP:
 	CLR R16					; limpio mi variable (setear a cero)
 	OUT PORTD, R16				; Les mando 0 voltios para empezar. 
 
-
-
 	;PORTB: BIN Out (PB0,1,2,3)
 	LDI		R16, 0x0F
 	OUT		DDRB, R16
@@ -169,9 +197,21 @@ SETUP:
 	LDI		MILLIS, 0x00
 	LDI		COUNTSECS, 0x00
 	LDI		COUNTDECS, 0x00
-	LDI		PUSHBOTTON_A, 0b00000001
-	LDI		PUSHBOTTON_B, 0b00000001
 
+	
+	LDI		VTEMP, 0b00000001
+	mov		PUSHBOTTON_A, VTEMP
+
+	LDI		VTEMP, 0b00000001
+	mov		PUSHBOTTON_B,VTEMP
+	;Estos son los nuevos contadores inicializados. 
+
+	LDI		MIN_UNITS, 0x00
+	LDI		MIN_TENS, 0x00
+	LDI		HOUR_UNITS, 0x00
+	LDI		HOUR_TENS, 0x00
+
+	CLR VTEMP
 	;Carga el primer valor de tabla (0) desde FLASH y lo muestra
 	LPM		SECStemp, Z
 	;COM		SECStemp			; Invierte los bits porqué es ánodo comúm
@@ -241,10 +281,71 @@ MAIN_LOOP:
 
 	;Si ya van 60 segundos en el conteo, reiniciamos el Display del contador de decenas de segundo (COUNTSECS)...
 	Limpiar2:
+	
+	clr		COUNTDECS
+	LDI		XL, LOW(DISPRAM << 1)
+	LDI 	XH, HIGH(DISPRAM << 1)
+
+	;============================
+	; INCREMENTAR MINUTOS
+	;============================
+
+	INC		MIN_UNITS
+	ldi		VTEMP, 10
+	CP		VTEMP, MIN_UNITS
+	BRNE	MAIN_LOOP
+
+	; Si llegó a 10 ? reset unidades minuto
+	CLR		MIN_UNITS
+	INC		MIN_TENS
+
+	ldi		VTEMP, 6
+	CP		VTEMP, MIN_TENS
+
+	BRNE	MAIN_LOOP
+
+	; Si llegó a 60 minutos ? reset minutos
+	CLR		MIN_TENS
+
+	;============================
+	; INCREMENTAR HORAS
+	;============================
+
+	INC		HOUR_UNITS
+	LDI		VTEMP, 10
+	CP		VTEMP, HOUR_UNITS
+	
+	BRNE	CHECK_24H
+
+	; Overflow 9 ? 0 y subir decena
+	CLR		HOUR_UNITS
+	INC		HOUR_TENS
+
+CHECK_24H:
+	; Si horas = 23 ? reset todo
+	ldi		VTEMP, 2
+	CP		VTEMP, HOUR_TENS
+	
+	BRNE	MAIN_LOOP
+
+	LDI		VTEMP, 4
+	CP		VTEMP, HOUR_UNITS
+	BRNE	MAIN_LOOP
+
+	; Si llegó a 24 ? reset total
+	CLR		HOUR_TENS; se limpia horas decenas
+	CLR		HOUR_UNITS; se limpia horas unidades
+	;CLR	MIN_UNITS
+	;CLR	MIN_TENS	
+	;CLR	HOUR_UNIT
+	;CLR	HOUR_TENS
+
+
+	/*
 		clr		COUNTDECS; se vuelkve a cero nuevamente. 
 		LDI		XL, LOW(DISPRAM << 1)
 		ldi 	XH, HIGH(DISPRAM << 1)
-
+	*/
     RJMP    MAIN_LOOP
 /*********************************************************/
 // NON-Interrupt subroutines
@@ -285,24 +386,6 @@ COUNTDWN:
 
 /******************************************************/
 
-// Interrupt routines:
-;========================
-; ISR Del prelab
-;========================
-/*ISR_PCINT1:
-
-    in temp, PINC
-
-;----- Botón PC0 (Incrementar) -----
-    sbrs temp, 0      ; Si bit 0 = 1 lo salta
-    rcall ANTIRREBOTE_INC
-
-;----- Botón PC1 (Decrementar) -----
-    sbrs temp, 1
-    rcall ANTIRREBOTE_DEC
-
-    reti
-	*/
 ;==========================================
 ; Parte del Lab
 ;===========================================

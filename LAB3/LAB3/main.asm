@@ -192,7 +192,7 @@ SETUP:
 
 	;clr ContadorLED
     ;out PORTB, ContadorLED
-	:====================================================
+	;====================================================
 
 	;Carga el primer valor de tabla (0) desde FLASH y lo muestra
 	LPM		SECStemp, Z
