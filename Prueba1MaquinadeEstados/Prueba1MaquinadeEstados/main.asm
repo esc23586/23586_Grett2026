@@ -23,8 +23,6 @@
 ; val timers
 .equ			T1VALUE_L			= 0xDC
 .equ			T1VALUE_H			= 0x0B
-;.equ			T1VALUE_L			= 0x06
-;.equ			T1VALUE_H			= 0x00; revisar
 .equ			T0VALUE				= 6
 
 
@@ -231,6 +229,10 @@ OUT     SPH, R16
     STS		PCICR, R16	
 	LDI		R16, (1 << SET_SPDT) | (1 << EN0) | (1 << EN_PB)
 	STS		PCMSK1, R16	
+	
+	
+
+
 /****************************************************************************************************************************/
 ; INICIALIZACIÓN DE CONTADORES y valores iniciales:
 
@@ -245,6 +247,8 @@ OUT     SPH, R16
 	; R5=0
 	LDI		R16, 0
 	MOV		R5, R16	
+
+
 	; Localidades en RAM
 	LDI		R16, 0
 	STS		MINUTOS_UNIDADES, R16
@@ -257,10 +261,12 @@ OUT     SPH, R16
 	STS		DIAS_DECENAS, R16
 	LDI		R16, 1
 	STS		MESES_UNIDADES, R16				; ¡Meses debe empezar en 01! NO HAY MESES CERO :,D
+
 	
 	LDI		R16, 0
 	STS		MESES_DECENAS, R16				; aqui sí aplicamos un cero
-	;Idea para trabajar la concordancia de la alarma, verificación.
+			
+			;Idea para trabajar la concordancia de la alarma, verificación.
 
 	;LDI		R16, (1 << ALARM_VALID) | (0 << ALARM_ACTIVE) | (0 << ALARM_SET)
 	;STS		ALARM_REGISTER, R16
@@ -313,22 +319,29 @@ LOOP:
 				CLR		msCOUNT1
 				;Toggle de dos puntos:
 				SBI		PIND, 7
+
+
 				;Sincronizamos BLINKSTATE con los dos puntos:
-				;Si PD7 está encendido, encendemos BLINKSTATE y nos vamos al SEGUNDO PASO
-				;Si PD7 está apagado, apagamos BLINKSTATE y nos vamos al SEGUNDO PASO
-				SBIS	PORTD, 7
+
+				;Si PD7 está encendido, encendemos BLINKSTATE y nos vamos al SEGUNDO PASO 
+				;Si PD7 está apagado, apagamos BLINKSTATE y nos vamos al SEGUNDO PASO, en este caso  pasa 
+/*
+				SBIS	PORTD, 7 ;EN EL Caso que la comprobación, salta en caso sea 1 el resultado. Sino ingora la siguente linea y va a RJMP ENCENDER_BLINKTATE
 				RJMP	APAGAR_BLINKSTATE
 				RJMP	ENCENDER_BLINKSTATE
+
 				APAGAR_BLINKSTATE:
 					;Apagamos el bit T en el SREG y lo copiamos en BLINKSTATE
+					; De esta manera, la bandera de mi temporal, permite la verifiación de este posteriormente.
 					CLT
-					BLD		MODO, BLINKSTATE
+					BLD		MODO, BLINKSTATE		;Copies the T bit in the SREG (Status Register) to bit b in register Rd
 					RJMP	SEGUNDO_PASO
 				ENCENDER_BLINKSTATE:
 					;Encendemos el bit T en el SREG y lo copiamos en BLINKSTATE
-					SET
-					BLD		MODO, BLINKSTATE
-					RJMP	SEGUNDO_PASO
+					set
+					BLD		MODO, BLINKSTATE ; De nuevo copia el valor de T en el sreg.
+					RJMP	SEGUNDO_PASO, 
+*/
 
 ; SEGUNDO PASO: Actualizar variables de conteo generales.
 
@@ -336,10 +349,12 @@ LOOP:
 		REVISAR_sCOUNT_EN_SEGUNDO_PASO:
 			;Si sCOUNT=60, habrá transcurrido un minuto; reiniciamos sCOUNT, incrementamos MINUTOS...
 			;y vamos a revisar el conteo de minutos
-			;Si sCOUNT!=60, vamos a revisar el conteo de minutos
-			CPI		sCOUNT, 60
-			BREQ	REINICIAR_sCOUNT_E_INCREMENTAR_MINUTOS_EN_SEGUNDO_PASO
-			RJMP	REVISAR_MINUTOS_EN_SEGUNDO_PASO
+			;Si sCOUNT=60, vamos a revisar el conteo de minutos
+
+			CPI		sCOUNT, 60; Comparamos, si llego a 60
+			BREQ	REINICIAR_sCOUNT_E_INCREMENTAR_MINUTOS_EN_SEGUNDO_PASO; si efectivamente así fue se salta a la etiqueta
+			RJMP	REVISAR_MINUTOS_EN_SEGUNDO_PASO; sino, regresa hasta que sea verdadero
+
 			REINICIAR_sCOUNT_E_INCREMENTAR_MINUTOS_EN_SEGUNDO_PASO:
 				CLR		sCOUNT
 				CALL	INCREMENTAR_MINUTOS_RUTINA
@@ -388,6 +403,7 @@ LOOP:
 			;Si DIAS!=DIAS_DEL_MES, vamos a revisar el conteo de meses
 			;Para revisar si DIAS=DIAS_DEL_MES, sumamos DIAS_UNIDADES y DIAS_DECENAS*10...
 			;y lo comparamos con el valor al cual apunta YPointer según el mes en que nos encontremos
+
 			LDS		R16, DIAS_UNIDADES
 			LDS		R17, DIAS_DECENAS
 			;Multiplicamos DIAS_DECENAS por 10 para sumarlo a DIAS_UNIDADES
@@ -519,6 +535,7 @@ LOOP:
 			BREQ	ENCENDER_BUZZER
 			RJMP	APAGAR_BUZZER
 			ENCENDER_BUZZER:
+			;Tentativamente esta en portB 5
 				SBI		PORTB, 5
 				RJMP	CUARTO_PASO
 			APAGAR_BUZZER:
@@ -537,9 +554,12 @@ LOOP:
 			;o DECREMENTAR. Si no se debe configurar algo, NO REVISAMOS el registro mencionado.
 			;Si no se quiere configurar nada, saltamos al QUINTO PASO.
 			;Creamos una PRIMERA máscara para MODO (Aquí nos importa SETUP_VALUE y SETUP_):
+			
 			LDI		R16, (1 << SETUP_VALUE) | (1 << SETUP_) | (1 << MODO1) | (1 << MODO0)
 			AND		R16, MODO
+
 			REVISAR_CONFIGURACION_CERO:
+
 			;Si SETUP_=1, SETUP_VALUE=0 y MODO1,0=00, se desea CONFIGURAR MINUTOS DE TIME_DISPLAY (DISPS0,1).
 			CPI		R16, (0 << SETUP_VALUE) | (1 << SETUP_) | (0 << MODO1) | (0 << MODO0)
 			BRNE	REVISAR_CONFIGURACION_UNO	
@@ -604,67 +624,89 @@ CONFIGURAR_MINUTOS_DE_TIME_DISPLAY:
 			;Si CAMBIO=1, revisamos si debemos incrementar o decrementar MINUTOS
 			;Si DIRECCION=1, incrementamos MINUTOS
 			;Si no, decrementamos MINUTOS
-			SBRS	ENCODER, DIRECCION
-			RJMP	DECREMENTAR_MINUTOS_EN_TIME_DISPLAY
-			RJMP	INCREMENTAR_MINUTOS_EN_TIME_DISPLAY
+			SBRS ENCODER, DIRECCION
+			RJMP DECREMENTAR_MINUTOS_EN_TIME_DISPLAY
+			RJMP INCREMENTAR_MINUTOS_EN TIME_DISPLAY
 			INCREMENTAR_MINUTOS_EN_TIME_DISPLAY:
-				;Llamamos a la rutina INCREMENTAR_MINUTOS
-				CALL	INCREMENTAR_MINUTOS_RUTINA
+			
+			;LLamo al incremento
+			Call	INCREMENTAR_MINUTOS_RUTINA;			Se llama a mi etiqueta, para que vaya icrementando. 
+
 				;Revisamos si MINUTOS_DECENAS=6. Si sí, reiniciamos MINUTOS a 0. Si no, salimos de la rutina con protocolo.
+
 				LDS		R16, MINUTOS_DECENAS
 				CPI		R16, 6
-				BREQ	REINICIAR_MINUTOS_EN_TIME_DISPLAY
+				BREQ	REINICIAR_MINUTOS_EN_TIME_DISPLAY;COMPARACIÓN = 0, ENTONECES SIGUIENTE LINEA,
 				RJMP	SALIR_DE_INCREMENTAR_O_DECREMENTAR_MINUTOS_EN_TIME_DISPLAY
+				
 				REINICIAR_MINUTOS_EN_TIME_DISPLAY:
-					LDI		R16, 0
-					STS		MINUTOS_UNIDADES, R16
-					STS		MINUTOS_DECENAS, R16
-					RJMP	SALIR_DE_INCREMENTAR_O_DECREMENTAR_MINUTOS_EN_TIME_DISPLAY
+				ldi  r16, 0
+				sts	 MINUTOS_UNIDAES, R16
+				sts  MINUTOS_DECENAS, R16
+				rjmp SALIR_DE_INCREMENTAR_O_DECREMENTAR_MINUTOS_EN TIME_DISPLAY
+
+			
 			DECREMENTAR_MINUTOS_EN_TIME_DISPLAY:
-				;¡Teniendo cuidado de establecer MINUTOS_UNIDADES=9 y decrementar MINUTOS_DECENAS de ser necesario!
-				LDS		R16, MINUTOS_UNIDADES
+
+				LDS		R16, MINUTOS_UNIDADES;¡Teniendo cuidado de establecer MINUTOS_UNIDADES=9 y decrementar MINUTOS_DECENAS de ser necesario!
+			
 				DEC		R16
-				CPI		R16, 0xFF
+				CPI		R16, 0XFF
 				BREQ	ESTABLECER_MINUTOS_UNIDADES_Y_DECREMENTAR_MINUTOS_DECENAS_EN_TIME_DISPLAY
+
+			
 				;Si MINUTOS_UNIDADES!=0xFF, solo lo guardamos...
-				STS		MINUTOS_UNIDADES, R16
-				RJMP	SALIR_DE_INCREMENTAR_O_DECREMENTAR_MINUTOS_EN_TIME_DISPLAY
-				ESTABLECER_MINUTOS_UNIDADES_Y_DECREMENTAR_MINUTOS_DECENAS_EN_TIME_DISPLAY:
+				 STS	MINUTOS_UNIDADES, R16
+				 RJMP SALIR_DE_INCREMENTAR_O_DECREMENTAR_MINUTOS_EN_TIME_DISPLAY
+				 ESTABLECER_MINUTOS_UNIDADES_Y_DECREMENTAR_MINUTOS_DECENAS_EN TIME_DISPLAY:
 					LDI		R16, 9
 					STS		MINUTOS_UNIDADES, R16
 					LDS		R16, MINUTOS_DECENAS
 					DEC		R16
-					;Si MINUTOS_DECENAS=0xFF, , establecemos MINUTOS=59
+					;SI MINUTOS_DECENAS= 0XFF,, ESTABLECEMOS  MINUTOS= 59, ESE ES EL LIMITE PA CONFIGURAR
+
 					CPI		R16, 0xFF
 					BREQ	ESTABLECER_MINUTOS_EN_TIME_DISPLAY
-					;Si MINUTOS_DECENAS!=0xFF, solo lo guardamos...
+					; SI MINUOTS DECENAS NO ES IGUAL, entonces solo guardamos
+
 					STS		MINUTOS_DECENAS, R16
-					RJMP	SALIR_DE_INCREMENTAR_O_DECREMENTAR_MINUTOS_EN_TIME_DISPLAY
+					RJMP	SALIR_DE_INCREMENTAR_O_DECREMENTAR_MINUITOS_EN TIME_DISPLAY
+
+					;Si MINUTOS_DECENAS!=0xFF, solo lo guardamos...
+					;STS		MINUTOS_DECENAS, R16
+					;RJMP	SALIR_DE_INCREMENTAR_O_DECREMENTAR_MINUTOS_EN_TIME_DISPLAY
+
 						ESTABLECER_MINUTOS_EN_TIME_DISPLAY:
-							LDI		R16, 5
-							STS		MINUTOS_DECENAS, R16
+							LDI		R16, 5 
+							STS		MINUTOS_DECENAS, R16 
 							LDI		R16, 9
 							STS		MINUTOS_UNIDADES, R16
 							RJMP	SALIR_DE_INCREMENTAR_O_DECREMENTAR_MINUTOS_EN_TIME_DISPLAY
-			SALIR_DE_INCREMENTAR_O_DECREMENTAR_MINUTOS_EN_TIME_DISPLAY:
-				;Reiniciamos TIM1 (Para tener fidelidad con lo deseado por lo usuario)
-				;Y APAGAMOS CAMBIO (El cambio ya fue interpretado y ejecutado)
-				LDI		R16, T1VALUE_H
+
+						
+
+			SALIR_DE_INCREMENTAR_O_DECREMENTAR_MINUOTS_EN_TIME_DISPLAY:
+			;SE REINCIIA TIM1  (para dener fidelidad con lo deseado por Pedro en su explicación)
+			; PARA APAGAR, EL CAMBIO DE (EN CASO YA HA SIDO apagado y ejecutado)
+				ldi		R16, T1VALUE_H; parte high
 				STS		TCNT1H, R16
-				LDI		R16, T1VALUE_L
-				STS		TCNT1L, R16	
-				LDI		sCOUNT, 0
+				LDI		R16, T1VALUE_L ; parte low
+				STS		TCNT1L, R16
+				LDI		sCOUNT, 0 ; se le carga cero
 				CLT
-				BLD		ENCODER, CAMBIO
+				bld		ENCODER, CAMBIO;Copies the T bit in the SREG (Status Register) to bit b in register Rd.
 				RET
 
+				;==============================================================
 		CONFIGURAR_HORAS_DE_TIME_DISPLAY:
-			;Apagamos ALARM_VALID en ALARM_REGISTER
-			LDS		R16, ALARM_REGISTER
-			CLT		
+		; se apagar el valor de verificación de la alargma, en alarm_Valid y se cambia en el registro de este, (ALARM_REGISTER)
+			LDS		R16, ALARM_REGISTER ;Load Direct from Data Space
+			CLT
 			BLD		R16, ALARM_VALID
 			STS		ALARM_REGISTER, R16
-			;Si CAMBIO=0, salimos de la rutina sin protocolo.
+			; SI CAMBIO =0, Salimos de la rutina, sin protocolo.
+
+				;==================================================================
 			SBRS	ENCODER, CAMBIO
 			RET
 			;Si CAMBIO=1, revisamos si debemos incrementar o decrementar HORAS
@@ -1347,7 +1389,7 @@ CONFIGURAR_MINUTOS_DE_TIME_DISPLAY:
 
 	;*******************************************************************************************************************************************
 		;¡Sub-rutinas del QUINTO PASO!
-
+/*
 		H_EN_DISPMODE:
 			LDI		XL, LOW(DISPMODE_H)
 			LDI		XH, HIGH(DISPMODE_H)
@@ -1368,7 +1410,7 @@ CONFIGURAR_MINUTOS_DE_TIME_DISPLAY:
 			LD		R16, X
 			STS		DISPMODE_VALUE, R16
 			RET
-
+*/
 		TIME_DISPLAY:
 			;Guardamos DISPS 0&1 con los HEX de MINUTOS_UNIDADES y MINUTOS_DECENAS respectivamente (Ajustamos el ZPointer)
 			;MINUTOS_UNIDADES en DISP0:
