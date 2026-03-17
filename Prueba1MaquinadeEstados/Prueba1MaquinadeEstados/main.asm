@@ -160,17 +160,25 @@ INTERFAZ:
 .equ			ALARMA_SEGUNDOS		= 0x0117
 
 ; Variables de cada display
-.equ			DISPMODE_VALUE		= 0x0109
+.equ			DISPMODE_VALUE		= 0x0109//Cambiar, puesto qeu se utilizará una diferente logica : ahora con PBs
+; Puede cambiarse a LEDMODE_VALUE; pues es mas cercano al funcionamiento final del contador led.
+
 .equ			DISP0_VALUE			= 0x010A
 .equ			DISP1_VALUE			= 0x010B
 .equ			DISP2_VALUE			= 0x010C
 .equ			DISP3_VALUE			= 0x010D
+;
+; Cambio de modo indicadores:
+.equ			DISPMODE_H			= 0x010E; Cambio a LEDMODE_1
+.equ			DISPMODE_F			= 0x010F; Cambio a LEDMODE_2
+.equ			DISPMODE_A			= 0x0110; Cambio a LEDMODE_2
+.equ			DISP_GUION			= 0x0116; Cambio o eliminación según sea necesario para evitar sobreextender el codigo. 
 
 ;NOTA 2:; Días de cada mes (Solo primera localidad para apuntar con el XPointer)
 .equ			DIAS_DE_MESES		= 0x0200
 
 
-; memoria y etiquetas para las interrupciones:
+; =========Memoria y etiquetas para las interrupciones:==========
 .cseg
 .org 0x0000
 	JMP SETUP
@@ -250,11 +258,6 @@ OUT     SPH, R16
 	LDI		R16, 32 ;Diciembre: 31 días
 	ST		X+, R16
 
-	; "-" para displays
-	/*
-	LDI		R16, 0x40
-	STS		DISP_GUION, R16
-	*/
 
 /************************************************************************************************************************************************/
 //CONFIGURACIÓN DE SALIDAS 
@@ -266,17 +269,21 @@ OUT     SPH, R16
 	CLR R16					; limpio mi variable (setear a cero)
 	OUT PORTD, R16				; Les mando 0 voltios para empezar. 
 
-;PORTB: BIN Out(se tutilizara un contador de 3, bits nomas) (PB0,1,2)
-	LDI		R16, 0b00000111
+; PORTB: Transistores de displays y Buzzer		|		PORTB: {0,0,BUZZER,0,D3,D2,D1,D0}
+	LDI		R16, 0x2F
 	OUT		DDRB, R16
-	LDI		R16, 0x00
+	LDI		R16, 0b00000000							;		¡MUX_SECUENCIA se encargará de llevar el orden!
 	OUT		PORTB, R16
 
-	;PORTC: entradas para mi maquina (PC0,1,2,3)              | DISPSMUXOUT (PC4,5,6,7)
-	LDI		R16, 0b11110000
+	
+;PORTC: Entradas de interfaz de usuario de pc0-pc4		|		PORTC: {0,0,1ed modo2,led modo1,SET_SPDT,EN1,EN0,EN_PB}		(EN: Encoder)
+	LDI		R16, 0
 	OUT		DDRC, R16
-	LDI		R16, 0b00001111 ;Comenzamos encendiendo DISPUNIS
+	LDI		R16, 0x0F						;	Todos necesitan pull up, menos las  salidas. 
 	OUT		PORTC, R16
+
+
+
 /*************************************************************************************************************************/
 
 ; Establecer TIM0 en modo Normal:
