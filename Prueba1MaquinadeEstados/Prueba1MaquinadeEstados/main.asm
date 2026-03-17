@@ -435,7 +435,7 @@ LOOP:
 					;Encendemos el bit T en el SREG y lo copiamos en BLINKSTATE
 					set
 					BLD		MODO, BLINKSTATE ; De nuevo copia el valor de T en el sreg.
-					RJMP	SEGUNDO_PASO, 
+					RJMP	SEGUNDO_PASO
 
 
 ; SEGUNDO PASO: Actualizar variables de conteo generales.
@@ -475,6 +475,7 @@ LOOP:
 			;y vamos a revisar el conteo de días
 			;Si HORAS!=24, vamos a revisar el conteo de días
 			;Para revisar si HORAS=24, sumamos HORAS_UNIDADES y HORAS_DECENAS*10
+
 			LDS		R16, HORAS_UNIDADES
 			LDS		R17, HORAS_DECENAS
 			;Multiplicamos HORAS_DECENAS por 10 para sumarlo a HORAS_UNIDADES
@@ -553,6 +554,7 @@ LOOP:
 				;Debemos revisar si ya ya hay una alarma activa, o, si no hay, si es válido que suene en caso de que ya sea hora.
 				;Si ALARM_ACTIVE=1, nos vamos a revisar si ya hay que apagarla.
 				;Si ALARM_ACTIVE=0, nos vamos a revisar si es válido que una posible alarma venidera suene.
+
 				LDS		R16, ALARM_REGISTER
 				SBRS	R16, ALARM_ACTIVE
 				RJMP	REVISAR_SI_LA_ALARMA_ES_VALIDA
@@ -630,7 +632,7 @@ LOOP:
 			BREQ	ENCENDER_BUZZER
 			RJMP	APAGAR_BUZZER
 			ENCENDER_BUZZER:
-			;Tentativamente esta en portB 5
+			;Tentativamente esta en portB5
 				SBI		PORTB, 5
 				RJMP	CUARTO_PASO
 			APAGAR_BUZZER:
@@ -648,10 +650,17 @@ LOOP:
 			;Si sí hay algo qué configurar, revisamos el registro ENCODER para verificar si hay que INCREMENTAR...
 			;o DECREMENTAR. Si no se debe configurar algo, NO REVISAMOS el registro mencionado.
 			;Si no se quiere configurar nada, saltamos al QUINTO PASO.
+
+		;==================	
+		; Recordatorio:Se utilizará un registro de propósito general nombrado "MODO" cuya función será guardar "flags" varias.
+		; Su CODIFICACIÓN es la siguiente: {00, SETUP_VALUE, BLINKSTATE, SETUP_, MODE_SELECT, MODO1, MODO0}
+		;==================
+
 			;Creamos una PRIMERA máscara para MODO (Aquí nos importa SETUP_VALUE y SETUP_):
 			
-			LDI		R16, (1 << SETUP_VALUE) | (1 << SETUP_) | (1 << MODO1) | (1 << MODO0)
-			AND		R16, MODO
+
+			LDI		R16, (1 << SETUP_VALUE) | (1 << SETUP_) | (1 << MODO1) | (1 << MODO0); 
+			AND		R16, MODO; Se realiza la comparación tipo AND para que sean 1, aquella coincidencia positiva.
 
 			REVISAR_CONFIGURACION_CERO:
 
@@ -659,44 +668,51 @@ LOOP:
 			CPI		R16, (0 << SETUP_VALUE) | (1 << SETUP_) | (0 << MODO1) | (0 << MODO0)
 			BRNE	REVISAR_CONFIGURACION_UNO	
 			CALL	CONFIGURAR_MINUTOS_DE_TIME_DISPLAY
-			REVISAR_CONFIGURACION_UNO:
-			;Si SETUP_=1, SETUP_VALUE=1 y MODO1,0=00, se desea CONFIGURAR HORAS DE TIME_DISPLAY (DISPS2,3).
-			CPI		R16, (1 << SETUP_VALUE) | (1 << SETUP_) | (0 << MODO1) | (0 << MODO0)
-			BRNE	REVISAR_CONFIGURACION_DOS
-			CALL	CONFIGURAR_HORAS_DE_TIME_DISPLAY
-			REVISAR_CONFIGURACION_DOS:
-			;Si SETUP_=1, SETUP_VALUE=0 y MODO1,0=01, se desea CONFIGURAR MES DE DATE_DISPLAY (DISPS0,1).
-			CPI		R16, (0 << SETUP_VALUE) | (1 << SETUP_) | (0 << MODO1) | (1 << MODO0)
-			BRNE	REVISAR_CONFIGURACION_TRES
-			CALL	CONFIGURAR_MES_DE_DATE_DISPLAY
-			REVISAR_CONFIGURACION_TRES:
-			;Si SETUP_=1, SETUP_VALUE=1 y MODO1,0=01, se desea CONFIGURAR DIAS DE DATE_DISPLAY (DISPS2,3).
-			CPI		R16, (1 << SETUP_VALUE) | (1 << SETUP_) | (0 << MODO1) | (1 << MODO0)
-			BRNE	REVISAR_CONFIGURACION_CUATRO
-			CALL	CONFIGURAR_DIAS_DE_DATE_DISPLAY
-			REVISAR_CONFIGURACION_CUATRO:
-			;Si SETUP_=1, SETUP_VALUE=0 y MODO1,0=10, se desea CONFIGURAR MINUTOS DEL MODO ALARMA (DISPS0,1).
-			CPI		R16, (0 << SETUP_VALUE) | (1 << SETUP_) | (1 << MODO1) | (0 << MODO0)
-			BRNE	REVISAR_CONFIGURACION_CINCO
-			CALL	CONFIGURAR_MINUTOS_DE_ALARM_DISPLAY
-			REVISAR_CONFIGURACION_CINCO:
-			;Si SETUP_=1, SETUP_VALUE=1 y MODO1,0=10, se desea CONFIGURAR HORAS DEL MODO ALARMA (DISPS2,3).
-			CPI		R16, (1 << SETUP_VALUE) | (1 << SETUP_) | (1 << MODO1) | (0 << MODO0)
-			BRNE	REVISAR_CONFIGURACION_SEIS
-			CALL	CONFIGURAR_HORAS_DE_ALARM_DISPLAY
+
+				REVISAR_CONFIGURACION_UNO:
+				;Si SETUP_=1, SETUP_VALUE=1 y MODO1,0=00, se desea CONFIGURAR HORAS DE TIME_DISPLAY (DISPS2,3).
+				CPI		R16, (1 << SETUP_VALUE) | (1 << SETUP_) | (0 << MODO1) | (0 << MODO0)
+				BRNE	REVISAR_CONFIGURACION_DOS
+				CALL	CONFIGURAR_HORAS_DE_TIME_DISPLAY
+
+					REVISAR_CONFIGURACION_DOS:
+					;Si SETUP_=1, SETUP_VALUE=0 y MODO1,0=01, se desea CONFIGURAR MES DE DATE_DISPLAY (DISPS0,1).
+					CPI		R16, (0 << SETUP_VALUE) | (1 << SETUP_) | (0 << MODO1) | (1 << MODO0)
+					BRNE	REVISAR_CONFIGURACION_TRES
+					CALL	CONFIGURAR_MES_DE_DATE_DISPLAY
+
+						REVISAR_CONFIGURACION_TRES:
+						;Si SETUP_=1, SETUP_VALUE=1 y MODO1,0=01, se desea CONFIGURAR DIAS DE DATE_DISPLAY (DISPS2,3).
+						CPI		R16, (1 << SETUP_VALUE) | (1 << SETUP_) | (0 << MODO1) | (1 << MODO0)
+						BRNE	REVISAR_CONFIGURACION_CUATRO
+						CALL	CONFIGURAR_DIAS_DE_DATE_DISPLAY
+
+							REVISAR_CONFIGURACION_CUATRO:
+							;Si SETUP_=1, SETUP_VALUE=0 y MODO1,0=10, se desea CONFIGURAR MINUTOS DEL MODO ALARMA (DISPS0,1).
+							CPI		R16, (0 << SETUP_VALUE) | (1 << SETUP_) | (1 << MODO1) | (0 << MODO0)
+							BRNE	REVISAR_CONFIGURACION_CINCO
+							CALL	CONFIGURAR_MINUTOS_DE_ALARM_DISPLAY
+								REVISAR_CONFIGURACION_CINCO:
+								;Si SETUP_=1, SETUP_VALUE=1 y MODO1,0=10, se desea CONFIGURAR HORAS DEL MODO ALARMA (DISPS2,3).
+								CPI		R16, (1 << SETUP_VALUE) | (1 << SETUP_) | (1 << MODO1) | (0 << MODO0)
+								BRNE	REVISAR_CONFIGURACION_SEIS
+								CALL	CONFIGURAR_HORAS_DE_ALARM_DISPLAY
+
+//Creación de segunda máscara:
 			REVISAR_CONFIGURACION_SEIS:
 			;Creamos una SEGUNDA máscara para MODO (Aquí nos importa MODE_SELECT):
 			LDI		R16, (1 << MODE_SELECT)
 			AND		R16, MODO
-			;Si MODE_SELECT=1 se debe CAMBIAR MODO. Se configura el valor de DISPMODE.
+
+			;Si MODE_SELECT=1 se debe CAMBIAR MODO.
 			CPI		R16, (1 << MODE_SELECT)
-			BRNE	SALIR_DE_CONFIGURACION
+			BRNE	SALIR_DE_CONFIGURACION; si no es igual, salta a la etiqueta
 			CALL	CONFIGURAR_MODO_EN_CUALQUIER_DISPLAY
 			SALIR_DE_CONFIGURACION:
 			;Si no se quiere configurar nada, saltamos al QUINTO PASO (Pero revisamos si podemos validar la alarma)
 			LDI		R16, (1 << MODE_SELECT) | (1 << SETUP_)
 			AND		R16, MODO
-			CPI		R16, (0 << MODE_SELECT) | (0 << SETUP_)
+			CPI		R16, (0 << MODE_SELECT) | (0 << SETUP_); realiza un compare con el or logico que realizamos. 
 			BREQ	HABILITAR_VALIDEZ_DE_ALARMA
 			RJMP	QUINTO_PASO
 				HABILITAR_VALIDEZ_DE_ALARMA:
@@ -713,17 +729,22 @@ CONFIGURAR_MINUTOS_DE_TIME_DISPLAY:
 			CLT		
 			BLD		R16, ALARM_VALID
 			STS		ALARM_REGISTER, R16
+			;==================
+			;Recordatorio: ENCODER: {00000,PB_LAST,CAMBIO,DIRECCION}
+			;=======================
+
 			;Si CAMBIO=0, salimos de la rutina sin protocolo.
 			SBRS	ENCODER, CAMBIO
 			RET
+
 			;Si CAMBIO=1, revisamos si debemos incrementar o decrementar MINUTOS
 			;Si DIRECCION=1, incrementamos MINUTOS
 			;Si no, decrementamos MINUTOS
 			SBRS ENCODER, DIRECCION
 			RJMP DECREMENTAR_MINUTOS_EN_TIME_DISPLAY
-			RJMP INCREMENTAR_MINUTOS_EN TIME_DISPLAY
+			RJMP INCREMENTAR_MINUTOS_EN TIME_DISPLAY;(una linea abajo :b)
+
 			INCREMENTAR_MINUTOS_EN_TIME_DISPLAY:
-			
 			;LLamo al incremento
 			Call	INCREMENTAR_MINUTOS_RUTINA;			Se llama a mi etiqueta, para que vaya icrementando. 
 
@@ -1432,6 +1453,7 @@ CONFIGURAR_MINUTOS_DE_TIME_DISPLAY:
 				;Si MODO=01, escribimos MODO=00
 				;Si MODO=10, escribimos MODO=01
 				;¡Las rutinas ya están creadas!
+
 				LDI		R16, (1 << MODO1) | (1 << MODO0)
 				AND		R16, MODO
 				CPI		R16, (0 << MODO1) | (0 << MODO0)
@@ -1445,6 +1467,7 @@ CONFIGURAR_MINUTOS_DE_TIME_DISPLAY:
 				CLT
 				BLD		ENCODER, CAMBIO
 				RET
+
 ; QUINTO PASO: Actualizar valores HEX para displays (Funciones TIME_DISPLAY, DATE_DISPLAY, y ALARM_DISPLAY).
 
 	QUINTO_PASO:
