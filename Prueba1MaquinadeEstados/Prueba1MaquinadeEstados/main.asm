@@ -1471,7 +1471,7 @@ CONFIGURAR_MINUTOS_DE_TIME_DISPLAY:
 ; QUINTO PASO: Actualizar valores HEX para displays (Funciones TIME_DISPLAY, DATE_DISPLAY, y ALARM_DISPLAY).
 
 	QUINTO_PASO:
-/*
+
 	ACTUALIZAR_DISPLAYS:
 		;Primero, revisamos MODOn en el registro MODO. Dependiendo de su configuración,...
 		;decidimos qué sacar en los displays
@@ -1504,7 +1504,7 @@ CONFIGURAR_MINUTOS_DE_TIME_DISPLAY:
 			CALL	ALARM_DISPLAY
 			;¡Reiniciamos el LOOP!
 			JMP		LOOP
-*/
+
 
 	;*******************************************************************************************************************************************
 
