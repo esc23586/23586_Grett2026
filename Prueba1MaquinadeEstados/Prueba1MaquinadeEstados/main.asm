@@ -318,11 +318,15 @@ OUT     SPH, R16
 
 	LDI		R16, (1 << PCIE1)
     STS		PCICR, R16	
+	/*
 	LDI		R16, (1 << SET_SPDT) | (1 << EN0) | (1 << EN_PB)
 	STS		PCMSK1, R16	
-	
-	
+	*/
 
+	; Habilitar solo los pines deseados
+	LDI     R16, (1 << EN_PB) | (1 << EN0) | (1 << EN1) | (1 << SET_SPDT)
+	STS     PCMSK1, R16
+	
 
 /****************************************************************************************************************************/
 ; INICIALIZACIÓN DE CONTADORES y valores iniciales:
@@ -335,7 +339,7 @@ OUT     SPH, R16
 	LDI		MODO, 0b00000000					
 	LDI		MUX_SECUENCIA, 0b00000001			; ¡Un transistor debe empezar encendido!; esta es un a correción a la asignación de voltaje inciial.
 	LDI		ENCODER, (1 << PB_LAST)				;PUSHBUTTON empieza no estando apachado
-	; R5=0
+
 	LDI		R16, 0
 	MOV		R5, R16	
 
@@ -359,8 +363,8 @@ OUT     SPH, R16
 			
 			;Idea para trabajar la concordancia de la alarma, verificación.
 
-	;LDI		R16, (1 << ALARM_VALID) | (0 << ALARM_ACTIVE) | (0 << ALARM_SET)
-	;STS		ALARM_REGISTER, R16
+	LDI		R16, (1 << ALARM_VALID) | (0 << ALARM_ACTIVE) | (0 << ALARM_SET)
+	STS		ALARM_REGISTER, R16
 
 	LDI		R16, 0
 	STS		A_MINUTOS_UNIDADES, R16
@@ -416,7 +420,7 @@ LOOP:
 
 				;Si PD7 está encendido, encendemos BLINKSTATE y nos vamos al SEGUNDO PASO 
 				;Si PD7 está apagado, apagamos BLINKSTATE y nos vamos al SEGUNDO PASO, en este caso  pasa 
-/*
+
 				SBIS	PORTD, 7 ;EN EL Caso que la comprobación, salta en caso sea 1 el resultado. Sino ingora la siguente linea y va a RJMP ENCENDER_BLINKTATE
 				RJMP	APAGAR_BLINKSTATE
 				RJMP	ENCENDER_BLINKSTATE
@@ -432,7 +436,7 @@ LOOP:
 					set
 					BLD		MODO, BLINKSTATE ; De nuevo copia el valor de T en el sreg.
 					RJMP	SEGUNDO_PASO, 
-*/
+
 
 ; SEGUNDO PASO: Actualizar variables de conteo generales.
 
