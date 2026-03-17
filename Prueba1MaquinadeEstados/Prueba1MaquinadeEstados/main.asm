@@ -1,13 +1,96 @@
 
 /*
-* NombreProgra.asm
+* Prueba1MaquinadeEstados.asm
 *
-* Creado: 
+* Creado: 07 de marzo 2026
 * Autor : Grettel Escobedo 23586
-* Descripción: Base para la creación de la maquina de Estados para el proyuecto 1, reloj. 
+* Descripción:						PROYECTO 1: Maquina de Estados- Reloj
+*
+*----
+* TIMERS: se utiliza timer1 para conteo de segundos, mientras que Timer0 se utiliza para multiplexación con aproximadamente 1ms
+*Se utilizará registros de roposito general para llevar la cuenta de milisegundos del Timer0 
+*Cuando llegué a 500ms, ocurre el parpadeo con los dos puntitos conectados a PD7
 
-*Se identifica, 6 estados, entones el  limite o overflow debe de ser de 7. 
-*Se utilizará el timer 1 en este caso. 
+*----
+*Cada display tendrá una localidad en RAM para guardar su valor HEX que tiene que "sacar" PORTD. Cada localidad será nombrada...
+;"DISPn_VALUE". Existen los Displays "0,1,2,3". En estos es que se presentan los numeros del reloj y de la Fecha.
+
+*----- 
+*Se utilizará un registro de propósito general nombrado "MODO" cuya función será guardar "flags" varias.
+*Su CODIFICACIÓN es la siguiente: {00, SETUP_VALUE, BLINKSTATE, SETUP_, MODE_SELECT, MODO1, MODO0}
+*"MODOn" indica si se debe MOSTRAR "Hora", "Fecha" o "Alarma"; sea en modo normal o en configuración. "00" es "Hora", "01" es "Fecha", y "10" es Alarma".
+ 
+//Explicación de cada uno//
+
+*"SETUP_" indica si se busca configurar algún modo de los mencionados arriba. Ello supone un parpadeo en el Display correspondiente.
+* De "SETUP_VALUE" se hablará más en profundidad en la explicación de interfaz de usuario. Linea:
+*"MODE_SELECT" indica si el usuario busca cambiar de modo. 
+*"MODE_SELECT" y "SETUP_" no pueden estar encendidos a la vez. Ello se detallará con la interfaz del usuario.
+*"BLINKSTATE" indica en qué estado deben estar los DISPS en su posible parpadeo para que sea interpretado por...
+*la multiplexación en la interrupción de TIM0. Los displays deben parpadear acorde a los dos puntos.
+*En general, este registro será actualizado con la interfaz del usuario, la cual es extendida más adelante.
+
+*NOTA IMPORTANTE: se utilizará un registro de proposito regeneral para guardar el orden de multiplexación de los displays.
+
+
+*-------------
+*Pinchange en port C (todos los botones para la interfáz del usuario)
+*-------------
+
+*Displays y localidades de memoria 
+* Se utiliza localidades de memoria para guardar minutos horas y días
+* Se utilizó como en el laboratorio 3,la división de unidades y decenas para un mejor oden en los diplays 
+*En la Ram igualmente esta guardado el tiempo configurado para la alarma
+*-----------------
+
+
+*El MAIN LOOP  se puede dividir por 5 partes escenciales:
+
+; --> PASO UNO: Actualizar parpadeo de dos puntos y posibles displays.
+; --> PASO DOS: Actualizar variables de conteo del reloj.
+; --> PASO TRES: Revisar si la alarma debe sonar.
+; --> PASO CUATRO: Revisar si el usuario quiere configurar algún modo del reloj.
+; --> PASO CINCO: Guardar en cada localidad "DISPn_VALUE" lo que tenga que mostrar cada display según el modo establecido.
+
+
+*Parte aspectos importantes sobre la ALARMA:
+
+;La alarma tendrá su propio registro nombrado ALARM_REGISTER, cuya codificación...
+;es la siguiente: {00000,ALARM_VALID,ALARM_ACTIVE,ALARM_SET}.
+
+*"ALARM_SET" es una flag que indicará si hay alarma configurada.
+*"ALARM_ACTIVE" es una flag que indica si la alarma está sonando o no.
+- Está flag es importante para la interfaz del usuario, pues, cuando la alarma esté sonando,
+- el botón del Encoder deberá apagar la alarma; el sistema sabrá que el botón apagará la alarma por esta flag.
+
+*"ALARM_VALID" es una flag que indica si es correcto que en ese tiempo la alarma suene o no.
+- Cuando el usuario se encuentre configurando la alarma, o se encuentre configurando hora, 
+-la flag se apagará. En cualquier otro caso, la flag se mantendrá encendida.
+
+*Por otro lado, existirá una localidad de memoria "ALARMA_SEGUNDOS", que, en caso de que haya alarma activa, 
+-llevará el conteo de segundos que la alarma lleva encendida. Si ALARMA_SEGUNDOS=120, la alarma se apagará automáticamente.
+- El conteo estará dado en TIM1INTERRUPT.
+
+*La alarma, al ser apagada, conservará el tiempo en que se quiera que suene.
+
+*-----------------
+* ENCODER: {00000,PB_LAST,CAMBIO,DIRECCION}
+
+*Se utilizará un registro de propósito general nombrado "ENCODER" que guardará si se debe INCREMENTAR o...
+DECREMENTAR algún valor  Esta acción de cambio únicamente tendrá efecto si alguna...
+bandera SETUP_ o MODE_SELECT en MODO se encuentra encendida. La "DIRECCION" de cambio se guardará constantemente...
+en el bit 0 del registro. Si DIRECCION=0, se desea decrementar algún valor; si DIRECCION=1, se desea incrementar dicho valor.
+
+* El bit 1 del registro será nombrado "CAMBIO", y se interpretará como una "flag" indicativa para verificar si SÍ se...
+-desea realizar un cambio o no. Esta flag sería encendida en la rutina de interrupción si se activa El pushbotton , y,...
+-para evitar un cambio constante, luego la flag sería apagada cuando se interprete el cambio en el LOOP.
+
+*El bit 2 del registro será nombrado "PB_LAST_STATE", y funcionará para evitar cambios ilógicos en la rutina de interrupción.
+
+*-------------------------
+INTERFAZ: 
+
+
 */
 /*****************************************************************************************************************************************/
 // Encabezado (Definición de Registros, Variables y Constantes)
@@ -21,23 +104,18 @@
 ; este nos ayuda a definir la cantidad de estados de la maquina. 
 
 ; val timers
-.equ			T1VALUE_L			= 0xDC
+.equ			T1VALUE_L			= 0xDC; pa timer 1
 .equ			T1VALUE_H			= 0x0B
-.equ			T0VALUE				= 6
+.equ			T0VALUE				= 6; pa timer 0
 
 
 ; Bits característicos del registro "MODO":
-;.equ			MODO_NUEVO1			= 7
-;.equ			MODO_NUEVO0			= 6
 .equ			SETUP_VALUE			= 5
 .equ			BLINKSTATE			= 4
 .equ			SETUP_				= 3
 .equ			MODE_SELECT			= 2
 .equ			MODO1				= 1
 .equ			MODO0				= 0
-
-.def COUNTER	= R19; contador 
-.def ACTION		= R20;acción registrada.
 
 ; Bits característicos para mi registro "ENCODER":
 .equ			PB_LAST				= 2
@@ -47,17 +125,17 @@
 
 ; Bits característicos del registro "ALARM_REGISTER":
 ; esto todavia hay que verificarm, realmente solo quiero indicar por ahora. 
-/*
+
 .equ			ALARM_SET			= 0
 .equ			ALARM_ACTIVE		= 1
 .equ			ALARM_VALID			= 2
-*/
+
 
 ; Bits característicos de PORTC:
 .equ			EN_PB				= 2
 .equ			EN0					= 3
 .equ			EN1					= 4
-.equ			SET_SPDT			= 5
+.equ			SET_SPDT			= 5 ; cambiar a SET_PB
 /*************************************************************************************************************************************/
 
 ; Localidades de memoria de mis datos; mejor orden.
@@ -73,7 +151,13 @@
 .equ			MESES_DECENAS		= 0x0108
 
 ; NOTA: hay que indicar los de la alarma posteriormente: 
-;(digamos que aqui los pondré)
+
+.equ			ALARM_REGISTER		= 0x0111
+.equ			A_MINUTOS_UNIDADES	= 0x0112
+.equ			A_MINUTOS_DECENAS   = 0x0113
+.equ			A_HORAS_UNIDADES	= 0x0114
+.equ			A_HORAS_DECENAS		= 0x0115
+.equ			ALARMA_SEGUNDOS		= 0x0117
 
 ; Variables de cada display
 .equ			DISPMODE_VALUE		= 0x0109
@@ -285,7 +369,7 @@ OUT     SPH, R16
 	;*******************************************************************************************************************************************
 
 	SEI
-/****************************************/
+	/****************************************/
 // Loop Infinito
 
 LOOP:
@@ -1353,6 +1437,7 @@ CONFIGURAR_MINUTOS_DE_TIME_DISPLAY:
 ; QUINTO PASO: Actualizar valores HEX para displays (Funciones TIME_DISPLAY, DATE_DISPLAY, y ALARM_DISPLAY).
 
 	QUINTO_PASO:
+/*
 	ACTUALIZAR_DISPLAYS:
 		;Primero, revisamos MODOn en el registro MODO. Dependiendo de su configuración,...
 		;decidimos qué sacar en los displays
@@ -1385,6 +1470,8 @@ CONFIGURAR_MINUTOS_DE_TIME_DISPLAY:
 			CALL	ALARM_DISPLAY
 			;¡Reiniciamos el LOOP!
 			JMP		LOOP
+*/
+
 	;*******************************************************************************************************************************************
 
 	;*******************************************************************************************************************************************
