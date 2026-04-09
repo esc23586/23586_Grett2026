@@ -1,0 +1,45 @@
+<ASSEMBLER_INFO>
+ <VERSION>2.2.8</VERSION>
+ <DEVICE>"ATmega328P"</DEVICE>
+ <WORKING_DIR>C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\PreProyecto1\PreProyecto1\Debug</WORKING_DIR>
+ <INCLUDE_PATH>
+  <DIR>C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\avrasm\inc</DIR>
+  <DIR>C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avrassembler\Include</DIR>
+  <DIR></DIR>
+ </INCLUDE_PATH>
+ <SOURCE_FILE>C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\PreProyecto1\PreProyecto1\main.asm</SOURCE_FILE>
+ <INCLUDED_FILES>
+  <FILE>C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\avrasm\inc\m328Pdef.inc</FILE>
+  <FILE>C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\avrasm\inc\M328PDEF.inc</FILE>
+ </INCLUDED_FILES>
+ <OBJECT_FILES>
+  <FILE>C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\PreProyecto1\PreProyecto1\Debug\PreProyecto1.obj</FILE>
+ </OBJECT_FILES>
+ <HEX_FILES>
+  <FILE>PreProyecto1.hex</FILE>
+ </HEX_FILES>
+ <OUTPUT_FILES>
+  <FILE>PreProyecto1.map</FILE>
+  <FILE>PreProyecto1.lss</FILE>
+ </OUTPUT_FILES>
+ <LABELS>
+  <DISPRAM><FILE>C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\PreProyecto1\PreProyecto1\main.asm</FILE><LINE>24</LINE></DISPRAM>
+  <SETUP><FILE>C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\PreProyecto1\PreProyecto1\main.asm</FILE><LINE>83</LINE></SETUP>
+  <ISR_PCINT1><FILE>C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\PreProyecto1\PreProyecto1\main.asm</FILE><LINE>412</LINE></ISR_PCINT1>
+  <RESET_TOGGLE><FILE>C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\PreProyecto1\PreProyecto1\main.asm</FILE><LINE>387</LINE></RESET_TOGGLE>
+  <TABLA><FILE>C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\PreProyecto1\PreProyecto1\main.asm</FILE><LINE>48</LINE></TABLA>
+  <MAIN_LOOP><FILE>C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\PreProyecto1\PreProyecto1\main.asm</FILE><LINE>247</LINE></MAIN_LOOP>
+  <COUNTSECS_UP><FILE>C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\PreProyecto1\PreProyecto1\main.asm</FILE><LINE>255</LINE></COUNTSECS_UP>
+  <Limpiar><FILE>C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\PreProyecto1\PreProyecto1\main.asm</FILE><LINE>265</LINE></Limpiar>
+  <Limpiar2><FILE>C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\PreProyecto1\PreProyecto1\main.asm</FILE><LINE>278</LINE></Limpiar2>
+  <CHECK_24H><FILE>C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\PreProyecto1\PreProyecto1\main.asm</FILE><LINE>319</LINE></CHECK_24H>
+  <COUNTUP_SEG><FILE>C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\PreProyecto1\PreProyecto1\main.asm</FILE><LINE>349</LINE></COUNTUP_SEG>
+  <RETURN_UP><FILE>C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\PreProyecto1\PreProyecto1\main.asm</FILE><LINE>425</LINE></RETURN_UP>
+  <COUNTUP><FILE>C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\PreProyecto1\PreProyecto1\main.asm</FILE><LINE>361</LINE></COUNTUP>
+  <COUNTDWN_SEG><FILE>C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\PreProyecto1\PreProyecto1\main.asm</FILE><LINE>368</LINE></COUNTDWN_SEG>
+  <RETURN_DWN><FILE>C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\PreProyecto1\PreProyecto1\main.asm</FILE><LINE>429</LINE></RETURN_DWN>
+  <COUNTDWN><FILE>C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\PreProyecto1\PreProyecto1\main.asm</FILE><LINE>375</LINE></COUNTDWN>
+  <COUNTDECS_SET><FILE>C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\PreProyecto1\PreProyecto1\main.asm</FILE><LINE>406</LINE></COUNTDECS_SET>
+  <TIMER_RETURN><FILE>C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\PreProyecto1\PreProyecto1\main.asm</FILE><LINE>403</LINE></TIMER_RETURN>
+ </LABELS>
+</ASSEMBLER_INFO>

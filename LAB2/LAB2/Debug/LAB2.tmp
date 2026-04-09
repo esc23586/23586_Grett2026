@@ -1,0 +1,44 @@
+<ASSEMBLER_INFO>
+ <VERSION>2.2.8</VERSION>
+ <DEVICE>"ATmega328P"</DEVICE>
+ <WORKING_DIR>C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB2\LAB2\Debug</WORKING_DIR>
+ <INCLUDE_PATH>
+  <DIR>C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\avrasm\inc</DIR>
+  <DIR>C:\Program Files (x86)\Atmel\Studio\7.0\toolchain\avr8\avrassembler\Include</DIR>
+  <DIR></DIR>
+ </INCLUDE_PATH>
+ <SOURCE_FILE>C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB2\LAB2\main.asm</SOURCE_FILE>
+ <INCLUDED_FILES>
+  <FILE>C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\avrasm\inc\m328Pdef.inc</FILE>
+  <FILE>C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\avrasm\inc\M328PDEF.inc</FILE>
+ </INCLUDED_FILES>
+ <OBJECT_FILES>
+  <FILE>C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB2\LAB2\Debug\LAB2.obj</FILE>
+ </OBJECT_FILES>
+ <HEX_FILES>
+  <FILE>LAB2.hex</FILE>
+ </HEX_FILES>
+ <OUTPUT_FILES>
+  <FILE>LAB2.map</FILE>
+  <FILE>LAB2.lss</FILE>
+ </OUTPUT_FILES>
+ <LABELS>
+  <START><FILE>C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB2\LAB2\main.asm</FILE><LINE>47</LINE></START>
+  <Table7seg><FILE>C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB2\LAB2\main.asm</FILE><LINE>58</LINE></Table7seg>
+  <MOSTRAR><FILE>C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB2\LAB2\main.asm</FILE><LINE>245</LINE></MOSTRAR>
+  <MAIN_LOOP><FILE>C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB2\LAB2\main.asm</FILE><LINE>125</LINE></MAIN_LOOP>
+  <CHECK_DEC><FILE>C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB2\LAB2\main.asm</FILE><LINE>149</LINE></CHECK_DEC>
+  <DELAY_REBOTE><FILE>C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB2\LAB2\main.asm</FILE><LINE>273</LINE></DELAY_REBOTE>
+  <INC_OK><FILE>C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB2\LAB2\main.asm</FILE><LINE>138</LINE></INC_OK>
+  <WAIT_INC><FILE>C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB2\LAB2\main.asm</FILE><LINE>141</LINE></WAIT_INC>
+  <TIMER_CHECK><FILE>C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB2\LAB2\main.asm</FILE><LINE>175</LINE></TIMER_CHECK>
+  <DEC_OK><FILE>C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB2\LAB2\main.asm</FILE><LINE>159</LINE></DEC_OK>
+  <DEC_DONE><FILE>C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB2\LAB2\main.asm</FILE><LINE>161</LINE></DEC_DONE>
+  <WAIT_DEC><FILE>C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB2\LAB2\main.asm</FILE><LINE>164</LINE></WAIT_DEC>
+  <CONT_OK><FILE>C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB2\LAB2\main.asm</FILE><LINE>204</LINE></CONT_OK>
+  <CHECK_DISPARO><FILE>C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB2\LAB2\main.asm</FILE><LINE>223</LINE></CHECK_DISPARO>
+  <FIN_TIMER><FILE>C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB2\LAB2\main.asm</FILE><LINE>238</LINE></FIN_TIMER>
+  <DLY1><FILE>C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB2\LAB2\main.asm</FILE><LINE>275</LINE></DLY1>
+  <DLY2><FILE>C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\LAB2\LAB2\main.asm</FILE><LINE>277</LINE></DLY2>
+ </LABELS>
+</ASSEMBLER_INFO>

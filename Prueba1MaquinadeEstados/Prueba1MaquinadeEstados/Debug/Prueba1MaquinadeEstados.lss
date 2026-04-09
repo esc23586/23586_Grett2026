@@ -1,0 +1,10 @@
+
+AVRASM ver. 2.2.8  C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\Prueba1MaquinadeEstados\Prueba1MaquinadeEstados\main.asm Tue Mar 17 08:54:40 2026
+
+[builtin](2): Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\avrasm\inc\m328Pdef.inc'
+C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\Prueba1MaquinadeEstados\Prueba1MaquinadeEstados\main.asm(97): Including file 'C:/Program Files (x86)\Atmel\Studio\7.0\Packs\atmel\ATmega_DFP\1.7.374\avrasm\inc\M328PDEF.inc'
+C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\Prueba1MaquinadeEstados\Prueba1MaquinadeEstados\main.asm(745): error: TIME_DISPLAY: Unknown instruction or macro
+C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\Prueba1MaquinadeEstados\Prueba1MaquinadeEstados\main.asm(762): error: TIME_DISPLAY: Unknown instruction or macro
+C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\Prueba1MaquinadeEstados\Prueba1MaquinadeEstados\main.asm(777): error: ESTABLECER_MINUTOS_UNIDADES_Y_DECREMENTAR_MINUTOS_DECENAS_EN: Unknown instruction or macro
+C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\Prueba1MaquinadeEstados\Prueba1MaquinadeEstados\main.asm(789): error: TIME_DISPLAY: Unknown instruction or macro
+C:\Users\grett\Documents\Atmel Studio\7.0\Prelab0_Grett2026\23586_Grett2026\Prueba1MaquinadeEstados\Prueba1MaquinadeEstados\main.asm(1535): error: Duplicate label: 'TIME_DISPLAY'
